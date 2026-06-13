@@ -1,0 +1,31 @@
+{
+  "task": "ai-study static curriculum expansion planning before team execution",
+  "planning_artifacts": {
+    "context": ".omx/context/ai-study-static-curriculum-20260613T153000Z.md",
+    "prd": ".omx/plans/prd-ai-study-static-curriculum-20260613T153000Z.md",
+    "test_spec": ".omx/plans/test-spec-ai-study-static-curriculum-20260613T153000Z.md"
+  },
+  "ralplan_architect_review": {
+    "order": 1,
+    "verdict": "APPROVE",
+    "agent_id": "019ec19e-9602-7842-99dd-bcf57870be53",
+    "summary": "Revised plan freezes 19 chapters, locks active-tab single-panel UX, resolves non-git team path, tightens source policy, and aligns tests. Execution warnings: keep 19 chapters immutable, use Lore baseline commit, no anchor-scroll primary UX, maintain source discipline, keep first team pass narrow."
+  },
+  "ralplan_critic_review": {
+    "order": 2,
+    "verdict": "APPROVE",
+    "agent_id": "019ec1a2-eb92-71a0-9688-e119ff88fb61",
+    "summary": "Critic approved after exact window.AI_STUDY_CURRICULUM/render.js contract, executable schema validation, widget lifecycle, Lore baseline commit, and exactly-19 chapter acceptance were added."
+  },
+  "ralplan_consensus_gate": {
+    "complete": true,
+    "review_order": ["architect", "critic"],
+    "approved_for": "$team execution"
+  },
+  "team_launch_guidance": {
+    "preflight": ["if .git absent: git init", "create Lore-compliant baseline commit", "launch team without worktrees for first pass"],
+    "recommended_launch": "omx team 3:executor \"Implement the approved AI study static curriculum expansion plan. Follow .omx/plans/prd-ai-study-static-curriculum-20260613T153000Z.md and .omx/plans/test-spec-ai-study-static-curriculum-20260613T153000Z.md. Lanes: content curriculum.js, UI/render/styles, verification/docs.\"",
+    "fixed_chapter_count": 19,
+    "must_preserve": ["no dependency static app", "no type=module", "active sidebar tab + single panel", "source discipline", "widget null guards and init after render"]
+  }
+}

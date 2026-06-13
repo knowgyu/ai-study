@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Specialist Preview Notes</title>
+  <link rel="stylesheet" href="./styles.css?v=2">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">AI</div>
+      <div>
+        <h1>Specialist Preview</h1>
+        <p>Day 1-4 예습 교안</p>
+      </div>
+    </div>
+
+    <nav class="toc" aria-label="Lecture outline">
+      <a href="#overview">0. 전체 지도</a>
+      <a href="#pytorch-map">1. PyTorch 큰 그림</a>
+      <a href="#tensor">2. Tensor와 shape</a>
+      <a href="#autograd">3. Autograd와 학습 루프</a>
+      <a href="#module">4. nn.Module 구현 감각</a>
+      <a href="#data-loader">5. Dataset/DataLoader</a>
+      <a href="#transformer">6. Transformer 뼈대</a>
+      <a href="#attention">7. Attention 구현</a>
+      <a href="#generation">8. Generation과 KV Cache</a>
+      <a href="#lora">9. Fine-tuning과 LoRA</a>
+      <a href="#data">10. Data와 평가</a>
+      <a href="#vit">11. ViT로 넘어가기</a>
+      <a href="#onedvice">12. On-device 관점</a>
+      <a href="#checklist">13. 수업 전 체크</a>
+      <a href="#sources">14. 참고 자료</a>
+    </nav>
+
+    <section class="side-note">
+      <h2>읽는 방법</h2>
+      <p>이 페이지는 “강의 전 뇌를 데우는 교안”이다. 코드를 전부 외우지 말고, PyTorch 기본 동작과 shape 흐름을 먼저 잡는다.</p>
+    </section>
+  </aside>
+
+  <main class="doc">
+    <section class="hero" id="overview">
+      <p class="eyebrow">10-day intensive assumption</p>
+      <h2>초반 강의는 PyTorch 구현 감각 위에 LLM 구조, 추론 최적화, LoRA, Data, ViT를 빠르게 얹는 흐름일 가능성이 높다.</h2>
+      <p class="lead">
+        KV Cache와 LoRA가 1-2일차에 나오고 ViT가 4일차에 들어온다면, 강의는 “딥러닝 기초를 천천히 배우는 과정”이 아니다.
+        PyTorch 문법은 빠르게 지나가고, 곧바로 Transformer 내부 구현과 실무 최적화 포인트로 들어갈 가능성이 크다.
+        그래서 예습의 목표는 완성 모델을 만드는 것이 아니라, 강사가 코드를 보여줄 때 <strong>무슨 텐서가 어떤 shape로 이동하는지</strong> 놓치지 않는 것이다.
+      </p>
+
+      <div class="timeline">
+        <div><strong>Day 1</strong><span>PyTorch recap, tensor shape, embedding, attention, decoder block</span></div>
+        <div><strong>Day 2</strong><span>generation loop, KV cache, fine-tuning, LoRA/QLoRA</span></div>
+        <div><strong>Day 3</strong><span>data format, Dataset/DataLoader, RAG/eval, tuning dataset</span></div>
+        <div><strong>Day 4</strong><span>ViT, patch embedding, image as token sequence</span></div>
+      </div>
+
+      <div class="ladder">
+        <div><b>읽기</b><span>개념을 한 문장으로 압축</span></div>
+        <div><b>보기</b><span>그림에서 정보 흐름 확인</span></div>
+        <div><b>따라치기</b><span>PyTorch 코드의 shape 출력</span></div>
+        <div><b>설명하기</b><span>왜 필요한지 말로 복원</span></div>
+      </div>
+    </section>
+
+    <section class="chapter" id="pytorch-map">
+      <div class="chapter-head">
+        <p class="eyebrow">PyTorch recap</p>
+        <h2>1. PyTorch 큰 그림: Tensor, Module, Data, Optimizer가 한 루프로 돈다</h2>
+      </div>
+      <p>
+        PyTorch는 크게 네 가지 덩어리로 기억하면 된다. <strong>Tensor</strong>는 숫자 배열이고,
+        <strong>Autograd</strong>는 계산 그래프를 따라 gradient를 계산한다.
+        <strong>nn.Module</strong>은 학습 가능한 layer와 forward 계산을 묶는 단위이고,
+        <strong>Dataset/DataLoader</strong>는 batch를 공급한다.
+      </p>
+
+      <div class="cards">
+        <article>
+          <h3>Tensor</h3>
+          <p>`torch.Tensor`는 NumPy 배열처럼 보이지만 GPU, dtype, gradient 추적을 함께 다룬다.</p>
+        </article>
+        <article>
+          <h3>Autograd</h3>
+          <p>`requires_grad=True`인 tensor 연산을 추적하고 `loss.backward()`에서 gradient를 채운다.</p>
+        </article>
+        <article>
+          <h3>nn.Module</h3>
+          <p>layer를 속성으로 들고 `forward()`에서 계산을 정의한다. 파라미터는 자동 등록된다.</p>
+        </article>
+        <article>
+          <h3>DataLoader</h3>
+          <p>Dataset에서 sample을 꺼내 batch로 묶고 shuffle, multiprocessing 등을 담당한다.</p>
+        </article>
+        <article>
+          <h3>Loss</h3>
+          <p>예측과 정답의 차이를 scalar로 만든다. language model은 보통 cross entropy를 쓴다.</p>
+        </article>
+        <article>
+          <h3>Optimizer</h3>
+          <p>gradient를 보고 parameter를 업데이트한다. `zero_grad → backward → step` 순서가 핵심이다.</p>
+        </article>
+      </div>
+
+      <pre><code>for x, y in dataloader:
+    logits = model(x)              # forward
+    loss = criterion(logits, y)     # scalar objective
+
+    optimizer.zero_grad()          # old gradient 제거
+    loss.backward()                # autograd로 gradient 계산
+    optimizer.step()               # parameter update</code></pre>
+
+      <p class="callout">
+        LLM 구현 코드도 결국 이 루프에서 크게 벗어나지 않는다. 차이는 `model(x)` 안에 embedding, attention, MLP, logits 계산이 들어간다는 점이다.
+      </p>
+    </section>
+
+    <section class="chapter" id="tensor">
+      <div class="chapter-head">
+        <p class="eyebrow">Shape literacy</p>
+        <h2>2. Tensor와 shape: LLM 초반 강의의 실제 언어</h2>
+      </div>
+      <p>
+        Transformer 구현에서 가장 많이 보는 실수는 수식이 아니라 shape다.
+        특히 `view`, `reshape`, `transpose`, `permute`, `contiguous`, `matmul`의 의미를 잊으면 attention 코드가 바로 흐려진다.
+      </p>
+
+      <div class="shape-table">
+        <div><span>B</span><strong>Batch</strong><p>한 번에 처리하는 sample 수</p></div>
+        <div><span>T</span><strong>Tokens</strong><p>sequence length</p></div>
+        <div><span>C</span><strong>Channels</strong><p>hidden dimension</p></div>
+        <div><span>H</span><strong>Heads</strong><p>attention head 수</p></div>
+        <div><span>D</span><strong>Head dim</strong><p>보통 C / H</p></div>
+      </div>
+
+      <div class="two-col">
+        <div>
+          <h3>자주 나오는 조작</h3>
+          <pre><code>x = torch.randn(B, T, C)
+qkv = linear(x)                    # [B, T, 3*C]
+q, k, v = qkv.chunk(3, dim=-1)
+
+q = q.view(B, T, H, D)
+q = q.transpose(1, 2)              # [B, H, T, D]</code></pre>
+        </div>
+        <div>
+          <h3>헷갈리는 포인트</h3>
+          <ul>
+            <li>`view`는 메모리가 연속적일 때 안전하다. `transpose` 뒤에는 `contiguous()`가 필요할 수 있다.</li>
+            <li>`transpose(-2, -1)`는 마지막 두 차원만 바꾼다. attention에서 `Kᵀ`를 만들 때 자주 쓴다.</li>
+            <li>`dim=-1`은 마지막 차원이다. hidden/channel 방향 연산에 자주 쓰인다.</li>
+            <li>broadcasting은 편하지만 mask shape가 틀리면 조용히 이상한 결과를 만들 수 있다.</li>
+          </ul>
+        </div>
+      </div>
+
+      <pre><code>x:         [B, T, C]
+q, k, v:   [B, T, C] -> [B, H, T, D]
+scores:    [B, H, T, T]
+weights:   [B, H, T, T]
+output:    [B, H, T, D] -> [B, T, C]</code></pre>
+    </section>
+
+    <section class="chapter" id="autograd">
+      <div class="chapter-head">
+        <p class="eyebrow">Training mechanics</p>
+        <h2>3. Autograd와 학습 루프: PyTorch가 gradient를 계산하는 방식</h2>
+      </div>
+      <p>
+        PyTorch에서 학습은 forward 계산으로 loss를 만들고, backward로 각 parameter의 `.grad`를 채운 뒤,
+        optimizer가 parameter 값을 바꾸는 흐름이다. `loss.backward()`는 “loss를 줄이려면 각 weight가 어느 방향으로 움직여야 하는가”를 계산한다.
+      </p>
+
+      <pre><code>w = torch.randn(3, 1, requires_grad=True)
+x = torch.randn(5, 3)
+y = torch.randn(5, 1)
+
+pred = x @ w
+loss = ((pred - y) ** 2).mean()
+loss.backward()
+
+print(w.grad.shape)  # [3, 1]</code></pre>
+
+      <div class="cards">
+        <article>
+          <h3>`model.train()`</h3>
+          <p>Dropout, BatchNorm처럼 학습/추론 동작이 다른 layer를 학습 모드로 둔다.</p>
+        </article>
+        <article>
+          <h3>`model.eval()`</h3>
+          <p>평가/추론 모드. gradient를 끄는 기능은 아니므로 `torch.no_grad()`와 함께 쓴다.</p>
+        </article>
+        <article>
+          <h3>`torch.no_grad()`</h3>
+          <p>추론 시 계산 그래프를 만들지 않아 memory를 아낀다.</p>
+        </article>
+      </div>
+
+      <p class="callout">
+        KV cache는 보통 추론 최적화 개념이고, 학습 루프에서는 cache를 켜지 않는 것이 원칙에 가깝다. Hugging Face 문서도 cache는 inference에서 쓰라고 경고한다.
+      </p>
+    </section>
+
+    <section class="chapter" id="module">
+      <div class="chapter-head">
+        <p class="eyebrow">Implementable mental model</p>
+        <h2>4. nn.Module 구현 감각: layer를 만들고 forward에서 연결한다</h2>
+      </div>
+      <p>
+        `nn.Module`은 PyTorch 모델의 기본 단위다. `__init__`에서 layer를 만들고, `forward`에서 입력이 어떻게 흘러가는지 정의한다.
+        속성으로 등록된 `nn.Linear`, `nn.Embedding` 같은 layer의 parameter는 `model.parameters()`에 자동으로 포함된다.
+      </p>
+
+      <pre><code>class TinyMLP(nn.Module):
+    def __init__(self, in_dim, hidden_dim, out_dim):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(in_dim, hidden_dim),
+            nn.GELU(),
+            nn.Linear(hidden_dim, out_dim),
+        )
+
+    def forward(self, x):
+        return self.net(x)</code></pre>
+
+      <div class="two-col">
+        <div>
+          <h3>LLM에서 자주 보는 layer</h3>
+          <ul>
+            <li>`nn.Embedding`: token id를 vector로 바꾼다.</li>
+            <li>`nn.Linear`: hidden vector를 다른 hidden vector 또는 logits로 바꾼다.</li>
+            <li>`nn.LayerNorm`: hidden dimension 기준으로 normalize한다.</li>
+            <li>`nn.Dropout`: 학습 중 일부 값을 꺼서 regularization한다.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>확인해야 할 습관</h3>
+          <ul>
+            <li>`print(x.shape)`를 forward 안에 임시로 넣어 shape를 확인한다.</li>
+            <li>`sum(p.numel() for p in model.parameters())`로 parameter 수를 본다.</li>
+            <li>`requires_grad`가 꺼진 parameter와 켜진 parameter를 구분한다.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="data-loader">
+      <div class="chapter-head">
+        <p class="eyebrow">Data path</p>
+        <h2>5. Dataset/DataLoader: 모델에 batch를 먹이는 표준 인터페이스</h2>
+      </div>
+      <p>
+        강의에서 “Data”가 나온다면 PyTorch의 Dataset/DataLoader를 복습해두는 것이 좋다.
+        Dataset은 index 하나에 sample 하나를 반환하고, DataLoader는 여러 sample을 batch로 묶어 학습 루프에 공급한다.
+      </p>
+
+      <pre><code>class TextDataset(torch.utils.data.Dataset):
+    def __init__(self, token_ids, block_size):
+        self.ids = token_ids
+        self.block_size = block_size
+
+    def __len__(self):
+        return len(self.ids) - self.block_size
+
+    def __getitem__(self, idx):
+        x = self.ids[idx:idx+self.block_size]
+        y = self.ids[idx+1:idx+self.block_size+1]
+        return torch.tensor(x), torch.tensor(y)
+
+loader = DataLoader(dataset, batch_size=32, shuffle=True)</code></pre>
+
+      <p>
+        Language model 학습에서는 입력 `x`와 정답 `y`가 한 칸 밀린 관계다. 예를 들어 `x = [나는, 밥을]`이면
+        `y = [밥을, 먹었다]`처럼 “다음 token 맞히기” 문제로 만든다.
+      </p>
+    </section>
+
+    <section class="chapter" id="transformer">
+      <div class="chapter-head">
+        <p class="eyebrow">Model architecture</p>
+        <h2>6. Transformer 뼈대: token을 섞는 attention과 token별 MLP를 반복한다</h2>
+      </div>
+      <p>
+        Decoder-only LLM은 입력 token을 embedding으로 바꾸고, 여러 개의 Transformer block을 통과시킨 뒤,
+        마지막 hidden state로 다음 token의 확률을 예측한다.
+      </p>
+
+      <div class="diagram stack">
+        <div class="pill">token ids [B,T]</div>
+        <div class="arrow">↓</div>
+        <div class="pill">token embedding + position [B,T,C]</div>
+        <div class="arrow">↓</div>
+        <div class="block-grid">
+          <div>LayerNorm</div>
+          <div>Self-Attention</div>
+          <div>Residual</div>
+          <div>LayerNorm</div>
+          <div>MLP / FFN</div>
+          <div>Residual</div>
+        </div>
+        <div class="arrow">↓</div>
+        <div class="pill">logits [B,T,vocab]</div>
+      </div>
+
+      <pre><code>class DecoderBlock(nn.Module):
+    def __init__(self, dim, num_heads):
+        super().__init__()
+        self.ln1 = nn.LayerNorm(dim)
+        self.attn = CausalSelfAttention(dim, num_heads)
+        self.ln2 = nn.LayerNorm(dim)
+        self.mlp = nn.Sequential(
+            nn.Linear(dim, 4 * dim),
+            nn.GELU(),
+            nn.Linear(4 * dim, dim),
+        )
+
+    def forward(self, x):
+        x = x + self.attn(self.ln1(x))
+        x = x + self.mlp(self.ln2(x))
+        return x</code></pre>
+    </section>
+
+    <section class="chapter" id="attention">
+      <div class="chapter-head">
+        <p class="eyebrow">Core implementation</p>
+        <h2>7. Attention 구현: QKᵀ로 점수를 만들고, mask 후 V를 섞는다</h2>
+      </div>
+
+      <div class="split">
+        <div>
+          <p>
+            Self-attention은 각 token을 Query, Key, Value 세 종류의 벡터로 바꾼다. Query는 “내가 찾는 정보”,
+            Key는 “내가 가진 정보의 주소”, Value는 “실제로 가져갈 내용”에 가깝다.
+          </p>
+          <pre><code>class CausalSelfAttention(nn.Module):
+    def __init__(self, dim, num_heads):
+        super().__init__()
+        assert dim % num_heads == 0
+        self.num_heads = num_heads
+        self.head_dim = dim // num_heads
+        self.qkv = nn.Linear(dim, 3 * dim)
+        self.proj = nn.Linear(dim, dim)
+
+    def forward(self, x):
+        B, T, C = x.shape
+        q, k, v = self.qkv(x).chunk(3, dim=-1)
+
+        q = q.view(B, T, self.num_heads, self.head_dim).transpose(1, 2)
+        k = k.view(B, T, self.num_heads, self.head_dim).transpose(1, 2)
+        v = v.view(B, T, self.num_heads, self.head_dim).transpose(1, 2)
+
+        scores = q @ k.transpose(-2, -1) / math.sqrt(self.head_dim)
+        mask = torch.triu(torch.ones(T, T, device=x.device), diagonal=1).bool()
+        scores = scores.masked_fill(mask, float("-inf"))
+        weights = torch.softmax(scores, dim=-1)
+        out = weights @ v
+
+        out = out.transpose(1, 2).contiguous().view(B, T, C)
+        return self.proj(out)</code></pre>
+        </div>
+
+        <div class="interactive">
+          <div class="interactive-head">
+            <strong>Causal attention viewer</strong>
+            <label>Query step <input id="attention-step" type="range" min="1" max="8" value="4"></label>
+          </div>
+          <div id="attention-viz" class="attention-viz"></div>
+        </div>
+      </div>
+
+      <p class="callout">
+        실제 최신 PyTorch 코드에서는 `torch.nn.functional.scaled_dot_product_attention`이나 `nn.MultiheadAttention`을 쓸 수 있다.
+        하지만 초반 예습에서는 직접 구현해봐야 KV cache와 ViT의 연결이 잘 보인다.
+      </p>
+    </section>
+
+    <section class="chapter" id="generation">
+      <div class="chapter-head">
+        <p class="eyebrow">Inference path</p>
+        <h2>8. Generation과 KV Cache: 학습보다 추론에서 중요한 구조</h2>
+      </div>
+
+      <p>
+        LLM 추론은 <strong>prefill</strong>과 <strong>decode</strong>로 나눠서 보는 것이 좋다.
+        prefill은 prompt 전체를 한 번 처리해서 각 layer의 K/V를 만들고, decode는 새 token 하나씩 생성하면서 새 K/V만 cache에 추가한다.
+      </p>
+
+      <div class="split">
+        <div class="diagram rows">
+          <div><strong>Prefill</strong><span>prompt 전체의 K/V를 계산해서 cache에 저장</span></div>
+          <div><strong>Decode 1</strong><span>새 token 1개의 K/V만 추가</span></div>
+          <div><strong>Decode 2</strong><span>기존 cache + 새 token으로 다음 token 계산</span></div>
+          <div><strong>Decode n</strong><span>sequence가 길어질수록 cache memory가 커짐</span></div>
+        </div>
+
+        <div class="interactive">
+          <div class="interactive-head">
+            <strong>KV cache growth</strong>
+            <label>Generated tokens <input id="kv-step" type="range" min="1" max="10" value="5"></label>
+          </div>
+          <div id="kv-viz" class="kv-viz"></div>
+        </div>
+      </div>
+
+      <pre><code>def attention_with_cache(x_new, past_k=None, past_v=None):
+    # x_new: [B, 1, C] during decode
+    q, k_new, v_new = make_qkv(x_new)
+
+    if past_k is not None:
+        k = torch.cat([past_k, k_new], dim=2)  # [B,H,Tpast+1,D]
+        v = torch.cat([past_v, v_new], dim=2)
+    else:
+        k, v = k_new, v_new
+
+    out = attend(q, k, v)
+    return out, k, v</code></pre>
+
+      <p>
+        KV cache는 속도를 위한 장치지만 공짜는 아니다. layer 수, head 수, context 길이, dtype에 비례해 memory가 든다.
+        그래서 긴 context, on-device inference, batch serving에서는 cache 관리가 중요한 최적화 주제가 된다.
+      </p>
+    </section>
+
+    <section class="chapter" id="lora">
+      <div class="chapter-head">
+        <p class="eyebrow">Efficient adaptation</p>
+        <h2>9. Fine-tuning과 LoRA: 큰 모델 전체를 고치지 않고 작은 업데이트만 학습한다</h2>
+      </div>
+
+      <p>
+        Full fine-tuning은 모델의 큰 weight 전체를 학습한다. LoRA는 원래 weight `W`를 고정하고,
+        낮은 rank의 작은 행렬 `A`, `B`만 학습해 `W + ΔW` 효과를 만든다.
+      </p>
+
+      <div class="split">
+        <div>
+          <pre><code>class LoRALinear(nn.Module):
+    def __init__(self, in_dim, out_dim, rank=8, alpha=16):
+        super().__init__()
+        self.base = nn.Linear(in_dim, out_dim)
+        self.base.weight.requires_grad_(False)
+        self.base.bias.requires_grad_(False)
+
+        self.A = nn.Linear(in_dim, rank, bias=False)
+        self.B = nn.Linear(rank, out_dim, bias=False)
+        self.scale = alpha / rank
+        nn.init.zeros_(self.B.weight)
+
+    def forward(self, x):
+        return self.base(x) + self.scale * self.B(self.A(x))</code></pre>
+          <p>
+            실제 PEFT 라이브러리에서는 `LoraConfig`로 rank, alpha, target module을 지정하고 모델을 감싼다.
+            수업에서는 직접 구현과 라이브러리 사용이 둘 다 나올 수 있다.
+          </p>
+        </div>
+
+        <div class="diagram lora-diagram">
+          <div class="pill">x</div>
+          <div class="arrow">→</div>
+          <div class="pill frozen">W frozen</div>
+          <div class="plus">+</div>
+          <div class="adapter">
+            <div>A trainable</div>
+            <div>B trainable</div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="pill good">adapted output</div>
+        </div>
+      </div>
+
+      <div class="cards">
+        <article>
+          <h3>rank r</h3>
+          <p>작을수록 parameter가 적고, 너무 작으면 표현력이 부족할 수 있다.</p>
+        </article>
+        <article>
+          <h3>target modules</h3>
+          <p>보통 attention의 q_proj/v_proj 또는 MLP layer에 붙인다.</p>
+        </article>
+        <article>
+          <h3>merge</h3>
+          <p>추론 시 adapter를 base weight에 합쳐 배포할 수 있다.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="chapter" id="data">
+      <div class="chapter-head">
+        <p class="eyebrow">Often underestimated</p>
+        <h2>10. Data와 평가: 모델 강의의 Data는 “성능을 결정하는 입력 설계”다</h2>
+      </div>
+
+      <p>
+        여기서 Data는 pandas 기초라기보다 LLM/Vision/RAG의 성능을 좌우하는 데이터 설계일 가능성이 높다.
+        학습 데이터, 검색 데이터, 평가 데이터는 목적이 다르다.
+      </p>
+
+      <div class="cards">
+        <article>
+          <h3>Training data</h3>
+          <p>SFT, instruction tuning, label 품질, 중복 제거, format 일관성, toxic/private data 제거</p>
+        </article>
+        <article>
+          <h3>Retrieval data</h3>
+          <p>chunking, embedding model, metadata, reranker, 문서 최신성, access control</p>
+        </article>
+        <article>
+          <h3>Evaluation data</h3>
+          <p>leakage 방지, holdout, task metric, 실패 케이스, regression set</p>
+        </article>
+      </div>
+
+      <pre><code># LLM 학습 샘플 예시
+{
+  "instruction": "다음 문서를 요약해줘.",
+  "input": "...",
+  "output": "..."
+}
+
+# RAG 평가 샘플 예시
+{
+  "question": "...",
+  "expected_context_ids": ["doc-12", "doc-31"],
+  "reference_answer": "..."
+}</code></pre>
+
+      <p class="callout">
+        Data 파트에서 가장 중요한 질문은 “모델이 무엇을 맞혀야 하는가?”와 “그걸 어떤 데이터로 검증할 수 있는가?”다.
+      </p>
+    </section>
+
+    <section class="chapter" id="vit">
+      <div class="chapter-head">
+        <p class="eyebrow">Bridge to vision</p>
+        <h2>11. ViT: 이미지를 token sequence처럼 다룬다</h2>
+      </div>
+
+      <div class="split">
+        <div>
+          <p>
+            Vision Transformer는 이미지를 작은 patch로 자르고, 각 patch를 선형 변환해서 embedding으로 만든다.
+            그 다음 class token과 position embedding을 붙이면 텍스트 token sequence와 거의 같은 형태가 된다.
+          </p>
+          <pre><code>class PatchEmbedding(nn.Module):
+    def __init__(self, image_size=224, patch_size=16, in_ch=3, dim=768):
+        super().__init__()
+        self.patch_size = patch_size
+        self.proj = nn.Conv2d(
+            in_ch, dim,
+            kernel_size=patch_size,
+            stride=patch_size,
+        )
+
+    def forward(self, x):
+        x = self.proj(x)            # [B, D, H/P, W/P]
+        x = x.flatten(2)            # [B, D, N]
+        x = x.transpose(1, 2)       # [B, N, D]
+        return x</code></pre>
+        </div>
+
+        <div class="interactive">
+          <div class="interactive-head">
+            <strong>Patch to token</strong>
+            <label>Visible patches <input id="patch-step" type="range" min="1" max="16" value="8"></label>
+          </div>
+          <div id="vit-viz" class="vit-viz"></div>
+        </div>
+      </div>
+
+      <p>
+        ViT 원 논문의 핵심은 CNN 구조를 고집하지 않고 이미지를 patch sequence로 만들어 표준 Transformer encoder에 넣는다는 점이다.
+        수업에서는 CNN 대비 장단점, patch size와 token 수의 trade-off, pretrained ViT fine-tuning이 같이 나올 수 있다.
+      </p>
+    </section>
+
+    <section class="chapter" id="onedvice">
+      <div class="chapter-head">
+        <p class="eyebrow">Deployment constraints</p>
+        <h2>12. On-device 관점: 모델 구조를 아는 이유는 결국 memory와 latency를 계산하기 위해서다</h2>
+      </div>
+
+      <p>
+        삼성 DX 맥락에서 on-device AI는 중요한 축일 가능성이 높다. 같은 모델이라도 cloud GPU에서 돌리는 것과 모바일/가전/NPU에서 돌리는 것은 제약이 다르다.
+      </p>
+
+      <div class="cards">
+        <article>
+          <h3>Parameter memory</h3>
+          <p>모델 weight가 차지하는 memory. FP16은 FP32의 절반, INT8은 대략 1/4 수준이다.</p>
+        </article>
+        <article>
+          <h3>Activation memory</h3>
+          <p>학습 중 중간값 저장 비용. inference보다 training에서 훨씬 크다.</p>
+        </article>
+        <article>
+          <h3>KV cache memory</h3>
+          <p>추론 중 context 길이에 따라 커지는 memory. long context에서 병목이 된다.</p>
+        </article>
+      </div>
+
+      <p>
+        Quantization, pruning, distillation, ONNX export, TensorRT/TFLite/ExecuTorch 같은 키워드는 모두 이 제약을 다루기 위한 도구로 보면 된다.
+      </p>
+    </section>
+
+    <section class="chapter" id="checklist">
+      <div class="chapter-head">
+        <p class="eyebrow">Before class</p>
+        <h2>13. 수업 전 최소 체크리스트</h2>
+      </div>
+
+      <div class="checklist">
+        <label><input type="checkbox"> <span><strong>PyTorch loop</strong> `zero_grad → backward → step` 순서를 설명할 수 있다.</span></label>
+        <label><input type="checkbox"> <span><strong>Module</strong> `__init__`과 `forward`의 역할을 구분할 수 있다.</span></label>
+        <label><input type="checkbox"> <span><strong>Shape</strong> `x: [B,T,C]`, `q/k/v: [B,H,T,D]`, `scores: [B,H,T,T]`를 말할 수 있다.</span></label>
+        <label><input type="checkbox"> <span><strong>Causal mask</strong> decoder가 미래 token을 보면 안 되는 이유를 설명할 수 있다.</span></label>
+        <label><input type="checkbox"> <span><strong>KV cache</strong> prefill과 decode의 차이를 설명할 수 있다.</span></label>
+        <label><input type="checkbox"> <span><strong>LoRA</strong> `W`는 고정하고 `A/B`만 학습한다는 구조를 이해한다.</span></label>
+        <label><input type="checkbox"> <span><strong>Data</strong> training/retrieval/evaluation data가 서로 다르다는 점을 안다.</span></label>
+        <label><input type="checkbox"> <span><strong>ViT</strong> image patch가 token처럼 처리된다는 연결을 이해한다.</span></label>
+      </div>
+    </section>
+
+    <section class="chapter" id="sources">
+      <div class="chapter-head">
+        <p class="eyebrow">Sources used</p>
+        <h2>14. 참고 자료</h2>
+      </div>
+      <ul class="source-list">
+        <li><a href="https://docs.pytorch.org/tutorials/beginner/basics/intro.html">PyTorch Learn the Basics</a> - data, model, optimization workflow.</li>
+        <li><a href="https://docs.pytorch.org/tutorials/beginner/basics/data_tutorial.html">PyTorch Datasets & DataLoaders</a> - Dataset/DataLoader interface.</li>
+        <li><a href="https://docs.pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html">PyTorch Neural Networks</a> - `nn.Module` and forward structure.</li>
+        <li><a href="https://docs.pytorch.org/docs/stable/generated/torch.nn.MultiheadAttention.html">PyTorch MultiheadAttention</a> - optimized attention API context.</li>
+        <li><a href="https://docs.pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html">PyTorch scaled_dot_product_attention</a> - modern SDPA function.</li>
+        <li><a href="https://huggingface.co/docs/transformers/en/kv_cache">Hugging Face Cache strategies</a> and <a href="https://huggingface.co/docs/transformers/cache_explanation">Caching explanation</a> - KV cache behavior and inference guidance.</li>
+        <li><a href="https://huggingface.co/docs/peft/en/index">Hugging Face PEFT</a> and <a href="https://huggingface.co/docs/peft/package_reference/lora">PEFT LoRA docs</a> - practical LoRA concepts/API.</li>
+        <li><a href="https://arxiv.org/abs/2106.09685">LoRA paper</a> - low-rank adaptation method and motivation.</li>
+        <li><a href="https://arxiv.org/abs/2010.11929">Vision Transformer paper</a> - image patches as Transformer input sequence.</li>
+        <li><a href="https://jalammar.github.io/illustrated-transformer/">The Illustrated Transformer</a> - visual explanation style inspiration.</li>
+      </ul>
+    </section>
+  </main>
+
+  <script src="./script.js?v=2"></script>
+</body>
+</html>
