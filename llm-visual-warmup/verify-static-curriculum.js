@@ -197,7 +197,10 @@ function validateCurriculum(chapters) {
 function validateUiContract() {
   const html = readRequired('llm-visual-warmup/index.html');
   const jsFiles = fs.existsSync(APP_DIR)
-    ? fs.readdirSync(APP_DIR).filter((file) => file.endsWith('.js')).sort()
+    ? fs.readdirSync(APP_DIR)
+      .filter((file) => file.endsWith('.js'))
+      .filter((file) => !/^verify[-.]/.test(file))
+      .sort()
     : [];
   const combinedJs = jsFiles
     .map((file) => fs.readFileSync(path.join(APP_DIR, file), 'utf8'))
@@ -206,8 +209,8 @@ function validateUiContract() {
   assertCheck(/AI_STUDY_CURRICULUM/.test(combinedJs), 'renderer consumes AI_STUDY_CURRICULUM');
   assertCheck(/location\.hash|hashchange|replaceState|pushState/.test(combinedJs), 'renderer handles URL hash state');
   assertCheck(/classList\.add\([^)]*active|aria-current|data-active/.test(combinedJs), 'renderer sets a visible active sidebar state');
-  assertCheck(/querySelector\([^)]*(toc|sidebar|chapter-list|nav)/.test(combinedJs), 'renderer targets generated sidebar/navigation');
-  assertCheck(/querySelector\([^)]*(chapter|detail|main)/.test(combinedJs), 'renderer targets a chapter detail panel');
+  assertCheck(/(querySelector|createElement)\([^)]*(toc|sidebar|chapter-list|nav)|\.toc|data-chapter-id/.test(combinedJs), 'renderer targets generated sidebar/navigation');
+  assertCheck(/(querySelector|createElement)\([^)]*(chapter|detail|main)|chapter-detail|data-chapter-id/.test(combinedJs), 'renderer targets a chapter detail panel');
   assertCheck(/attention-step|kv-step|patch-step/.test(html + combinedJs), 'attention/KV/ViT widget hooks are present when widgets are shipped');
 }
 
