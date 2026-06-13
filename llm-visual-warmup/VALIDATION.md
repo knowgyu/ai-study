@@ -111,3 +111,36 @@ curl_exit=0
 - Manual hash checks pass for default, valid, and invalid hashes.
 - Widget regression checks pass for attention, KV cache, and ViT chapters.
 - Source map renders official/university references and all source links are clickable.
+
+## Parallel probe findings integrated
+
+Subagents spawned: 2 (`review-probe` / Locke `019ec1a6-8803-7b62-9a08-cc80a370de25`, `test-probe` / Pauli `019ec1a6-9ffd-77f3-9981-6f8d6bcf4662`).
+Subagent model: `gpt-5.4-mini`.
+Serial searches before spawn: 0.
+
+### Review probe findings
+
+- Must-fix: `curriculum.js` is missing, so the frozen 19-chapter schema cannot pass.
+- Must-fix: current legacy `lectureDetails`/section IDs do not match the approved inventory.
+- Must-fix: current UI remains the old anchor-scroll model instead of generated sidebar tabs plus single chapter panel.
+- Must-fix: hash routing, active state, invalid-hash fallback, and chapter-scoped source metadata are absent.
+- Nice-to-have: add keyboard focus styling for generated sidebar controls.
+- Documentation gap addressed in this task: added `README.md`, `TEACHING-SOURCES.md`, and this report.
+
+### Test probe findings
+
+- Existing executable coverage is limited to static file presence, JS syntax, and HTTP serving.
+- Required regression checks after implementation are the schema/global check, UI-contract grep, hash/manual QA, and widget lifecycle checks.
+- The exact schema validator from the test spec currently fails because `llm-visual-warmup/curriculum.js` is absent.
+- Final integration must verify script order (`curriculum.js` before `render.js`), no ES modules, valid/invalid hash behavior, and attention/KV/ViT widget updates after render.
+
+## UI-contract grep for current baseline
+
+Recommended command:
+
+```bash
+rg -n "chapter-nav|chapter-panel|AI_STUDY_CURRICULUM|curriculum\\.js|render\\.js|location.hash|hashchange|aria-current|class=\"active\"" llm-visual-warmup
+```
+
+Expected after integration: matches in `index.html`, `curriculum.js`, `render.js`, and styles/tests for active state.
+Current baseline expectation: no meaningful matches for the required generated-renderer contract.
