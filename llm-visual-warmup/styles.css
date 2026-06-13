@@ -723,3 +723,230 @@ p {
     grid-template-columns: 1fr;
   }
 }
+
+/* Data-driven single-panel curriculum app */
+.toc a.active,
+.toc a[aria-current="page"] {
+  background: #f1c84b;
+  color: #121a21;
+  border-color: #f1c84b;
+  font-weight: 850;
+}
+
+.toc a span {
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  margin-right: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 12px;
+}
+
+.toc a.active span,
+.toc a[aria-current="page"] span {
+  background: rgba(18, 26, 33, 0.14);
+}
+
+.chapter-panel,
+.chapter-card {
+  display: grid;
+  gap: 18px;
+}
+
+.chapter-card > section,
+.chapter-hero,
+.lesson-section,
+.lab-card,
+.note-card,
+.source-card,
+.source-map,
+.source-chapter {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.chapter-hero {
+  display: grid;
+  gap: 12px;
+}
+
+.chapter-hero h2 {
+  max-width: 920px;
+  font-size: 34px;
+  line-height: 1.18;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.summary-grid > div,
+.cards article,
+.lab-card,
+.note-card {
+  background: #fbfcfd;
+}
+
+.summary-grid > div {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.summary-grid strong,
+.cards strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--blue);
+}
+
+.lesson-section {
+  display: grid;
+  gap: 12px;
+}
+
+.cards.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.note-card.warning {
+  border-left: 4px solid var(--amber);
+}
+
+.note-card.check {
+  border-left: 4px solid var(--green);
+}
+
+.source-card ul,
+.source-map ul {
+  padding-left: 20px;
+}
+
+.source-card li,
+.source-map li {
+  margin-bottom: 10px;
+}
+
+.source-card a,
+.source-map a {
+  color: var(--blue);
+  text-decoration: underline;
+  font-weight: 750;
+}
+
+.source-type {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.interactive {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.viz {
+  display: grid;
+  gap: 10px;
+}
+
+.token-row,
+.score-row {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(48px, 1fr));
+  gap: 8px;
+}
+
+.token,
+.score,
+.cache-cell,
+.patch {
+  display: grid;
+  place-items: center;
+  min-height: 42px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #ffffff;
+  font-weight: 800;
+}
+
+.token.active,
+.score.visible,
+.patch.visible {
+  background: var(--teal-soft);
+  color: var(--green);
+  border-color: rgba(12, 143, 104, 0.35);
+}
+
+.score.masked {
+  background: #f4e8ea;
+  color: var(--red);
+}
+
+.kv-viz {
+  grid-template-columns: repeat(4, minmax(56px, 1fr));
+}
+
+.cache-cell.k {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.cache-cell.v {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.vit-viz {
+  grid-template-columns: repeat(4, minmax(64px, 1fr));
+}
+
+.mini-caption {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+@media (max-width: 920px) {
+  body {
+    display: block;
+  }
+
+  .sidebar {
+    position: static;
+    height: auto;
+  }
+
+  .doc {
+    padding: 18px 14px 48px;
+  }
+
+  .summary-grid,
+  .cards.three,
+  .two-col,
+  .lecture-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chapter-hero h2 {
+    font-size: 28px;
+  }
+
+  .token-row,
+  .score-row,
+  .kv-viz,
+  .vit-viz {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
