@@ -7,6 +7,7 @@
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+const { spawnSync } = require('child_process');
 
 const ROOT = process.cwd();
 const APP_DIR = path.join(ROOT, 'llm-visual-warmup');
@@ -45,6 +46,10 @@ const REQUIRED_CHAPTER_KEYS = [
   'sources',
 ];
 const REQUIRED_SOURCE_KEYS = ['label', 'url', 'type', 'note'];
+const REQUIRED_MENTAL_MODEL_KEYS = ['conceptNote', 'flow', 'shape'];
+const MIN_CHAPTER_TEXT_CHARS = 1100;
+const MIN_SECTION_BODY_CHARS = 35;
+const MIN_LAB_STEPS = 2;
 const VALID_SOURCE_TYPES = new Set(['official', 'university', 'paper', 'supplemental']);
 const IMPLEMENTATION_HINT_IDS = new Set([
   'tensor-shape',
@@ -145,6 +150,11 @@ function validateNoMetaCopy(label, text) {
   }
 }
 
+function hasDiagramLikeContent(value) {
+  const text = flattenText(value);
+  return /→|->|\[[^\]]+\]|shape|flow|흐름|단계|입력|출력|tokens?|tensor|logits|loss|cache|patch/i.test(text);
+}
+
 function hasCodeLikeContent(value) {
   if (!value) return false;
   if (typeof value === 'string') {
@@ -164,6 +174,15 @@ function validateStaticFiles() {
     : [];
   assertCheck(jsFiles.length > 0, 'at least one JavaScript file exists in llm-visual-warmup');
   console.log(`INFO js_files=${jsFiles.map((file) => `llm-visual-warmup/${file}`).join(', ') || '(none)'}`);
+
+  for (const file of jsFiles) {
+    const relativePath = `llm-visual-warmup/${file}`;
+    const result = spawnSync(process.execPath, ['--check', relativePath], { cwd: ROOT, encoding: 'utf8' });
+    assertCheck(result.status === 0, `${relativePath} passes node --check syntax`);
+    if (result.status !== 0) {
+      console.error((result.stderr || result.stdout || '').trim());
+    }
+  }
 }
 
 function loadCurriculum() {
@@ -213,13 +232,26 @@ function validateCurriculum(chapters) {
     assertCheck(typeof chapter.oneLiner === 'string' && chapter.oneLiner.trim().length > 0, `${label} oneLiner is non-empty`);
     assertCheck(typeof chapter.whyNow === 'string' && chapter.whyNow.trim().length > 0, `${label} whyNow is non-empty`);
     assertCheck(Array.isArray(chapter.learningGoals) && chapter.learningGoals.length >= 2, `${label} has at least 2 learning goals`);
-    assertCheck(Array.isArray(chapter.sections) && chapter.sections.length >= 2, `${label} has at least 2 sections`);
+    assertCheck(Array.isArray(chapter.prerequisites), `${label} prerequisites is an array`);
+    assertCheck(Array.isArray(chapter.sections) && chapter.sections.length >= 3, `${label} has at least 3 lecture-note sections`);
     assertCheck(chapter.lab && typeof chapter.lab === 'object', `${label} has a lab object`);
     assertCheck(Array.isArray(chapter.misconceptions) && chapter.misconceptions.length >= 1, `${label} has misconceptions`);
-    assertCheck(Array.isArray(chapter.checks) && chapter.checks.length >= 2, `${label} has at least 2 check questions`);
-    assertCheck(Array.isArray(chapter.sources) && chapter.sources.length >= 1, `${label} has at least 1 source`);
+    assertCheck(Array.isArray(chapter.checks) && chapter.checks.length >= 3, `${label} has at least 3 check questions`);
+    assertCheck(Array.isArray(chapter.sources) && chapter.sources.length >= 2, `${label} has at least 2 sources`);
+    assertCheck(flattenText(chapter).length >= MIN_CHAPTER_TEXT_CHARS, `${label} has beginner-depth lesson copy (${MIN_CHAPTER_TEXT_CHARS}+ chars)`);
 
     validateNoMetaCopy(`${label} visible lesson copy`, flattenText(chapter));
+
+    assertCheck(chapter.mentalModel && typeof chapter.mentalModel === 'object', `${label} has mentalModel diagram data`);
+    if (chapter.mentalModel && typeof chapter.mentalModel === 'object') {
+      for (const key of REQUIRED_MENTAL_MODEL_KEYS) {
+        assertCheck(typeof chapter.mentalModel[key] === 'string' && chapter.mentalModel[key].trim().length > 0, `${label} mentalModel.${key} is non-empty`);
+      }
+      assertCheck(hasDiagramLikeContent(chapter.mentalModel), `${label} mentalModel contains original flow/shape diagram cues`);
+    }
+
+    assertCheck(chapter.lab && Array.isArray(chapter.lab.steps) && chapter.lab.steps.length >= MIN_LAB_STEPS, `${label} lab has at least ${MIN_LAB_STEPS} concrete steps`);
+    assertCheck(Boolean(chapter.lab && chapter.lab.expectedInsight), `${label} lab has expectedInsight`);
 
     if (IMPLEMENTATION_HINT_IDS.has(chapter.id)) {
       assertCheck(hasCodeLikeContent(chapter.sections) || hasCodeLikeContent(chapter.lab), `${label} includes code or pseudo-code guidance`);
@@ -231,6 +263,7 @@ function validateCurriculum(chapters) {
         if (section && typeof section === 'object') {
           assertCheck(Boolean(section.heading), `${label} section ${sectionIndex + 1} has heading`);
           assertCheck(Boolean(section.body || section.bullets || section.code), `${label} section ${sectionIndex + 1} has body, bullets, or code`);
+          assertCheck(flattenText(section).length >= MIN_SECTION_BODY_CHARS, `${label} section ${sectionIndex + 1} has lecture-note depth`);
         }
       });
     }
@@ -248,6 +281,21 @@ function validateCurriculum(chapters) {
       }
     }
   }
+}
+
+
+function validateDocsContract() {
+  const docFiles = ['README.md', 'VERIFICATION.md', 'VALIDATION.md', 'TEACHING-SOURCES.md'];
+  for (const file of docFiles) {
+    const relativePath = `llm-visual-warmup/${file}`;
+    const text = readRequired(relativePath);
+    validateNoMetaCopy(relativePath, text);
+  }
+  const verification = fs.readFileSync(path.join(APP_DIR, 'VERIFICATION.md'), 'utf8');
+  assertCheck(verification.includes('node llm-visual-warmup/verify-static-curriculum.js'), 'VERIFICATION.md documents verifier command');
+  assertCheck(/node --check/.test(verification), 'VERIFICATION.md documents JS syntax checks');
+  assertCheck(/banned-term|금지어|banned context/.test(verification), 'VERIFICATION.md documents banned-term scan');
+  assertCheck(/http\.server|curl/.test(verification), 'VERIFICATION.md documents local HTTP smoke');
 }
 
 function validateUiContract() {
@@ -272,6 +320,15 @@ function validateUiContract() {
   assertCheck(/location\.hash|hashchange/.test(combinedJs), 'hash navigation hook is preserved');
 
   const renderJs = fs.readFileSync(path.join(APP_DIR, 'render.js'), 'utf8');
+  const styles = fs.readFileSync(path.join(APP_DIR, 'styles.css'), 'utf8');
+  const curriculumScriptIndex = html.indexOf('src="./curriculum.js"');
+  const renderScriptIndex = html.indexOf('src="./render.js"');
+  assertCheck(curriculumScriptIndex >= 0, 'index.html loads curriculum.js');
+  assertCheck(renderScriptIndex >= 0, 'index.html loads render.js');
+  assertCheck(curriculumScriptIndex >= 0 && renderScriptIndex > curriculumScriptIndex, 'index.html loads curriculum.js before render.js');
+  assertCheck(!/<script[^>]+type=["']module["']/i.test(html), 'index.html does not require ES modules');
+  assertCheck(/class="diagram"|mental-model|lecture-flow/.test(html + renderJs + styles), 'original no-dependency diagram/flow styling is present');
+  assertCheck(/mentalModel\.(flow|shape)|lecture-flow|diagram/.test(renderJs), 'renderer displays curriculum diagram/flow data');
   const visibleUiSource = `${html}\n${renderJs}`;
   for (const label of REQUIRED_KOREAN_UI_LABELS) {
     assertCheck(visibleUiSource.includes(label), `visible UI includes Korean label: ${label}`);
@@ -286,6 +343,7 @@ validateStaticFiles();
 const chapters = loadCurriculum();
 validateCurriculum(chapters);
 validateUiContract();
+validateDocsContract();
 
 if (failures > 0) {
   console.error(`\nRESULT FAIL ${failures} check(s) failed`);

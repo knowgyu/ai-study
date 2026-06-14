@@ -2,51 +2,57 @@
 
 This folder intentionally stays no-dependency. Run the checks from the repository root.
 
-## Syntax/static smoke
+## 1. JavaScript syntax
 
 ```bash
-python3 - <<'PY'
-from pathlib import Path
-required = [
-    'llm-visual-warmup/index.html',
-    'llm-visual-warmup/styles.css',
-]
-for p in required:
-    text = Path(p).read_text(encoding='utf-8')
-    assert text.strip(), f'{p} is empty'
-    print(p, 'lines=', text.count('\n') + 1, 'chars=', len(text))
-
-js_files = sorted(Path('llm-visual-warmup').glob('*.js'))
-assert js_files, 'expected at least one JS file'
-print('js_files=', ', '.join(str(p) for p in js_files))
-PY
 for f in llm-visual-warmup/*.js; do node --check "$f"; done
 ```
 
-## PRD/test-spec contract
+Expected: every JavaScript file exits with status 0. The verifier also runs `node --check` internally for every `.js` file in this folder.
+
+## 2. Curriculum and UI contract
 
 ```bash
 node llm-visual-warmup/verify-static-curriculum.js
 ```
 
-The verifier enforces the approved v1 contract:
+The verifier enforces the v1 contract:
 
 - `window.AI_STUDY_CURRICULUM` is exposed by `llm-visual-warmup/curriculum.js` without ES modules.
-- The fixed 19 chapter IDs match the PRD order exactly.
-- Every chapter has required schema fields, goals, sections, lab, misconceptions, checks, and source metadata.
+- The fixed 19 chapter IDs match the approved order exactly.
+- Every chapter has required schema fields, prerequisites, goals, at least three lecture-note sections, a concrete lab, misconceptions, at least three check questions, and at least two sources.
+- Every chapter includes `mentalModel.conceptNote`, `mentalModel.flow`, and `mentalModel.shape` so the rendered lesson has original no-dependency diagram/flow support.
 - Implementation-oriented chapters include code or pseudo-code guidance.
-- Renderer code consumes curriculum data, handles hash state, sets visible active navigation state, and keeps attention/KV/ViT widget hooks available when shipped.
+- Visible lesson/UI/docs copy avoids banned context/meta terms and web-building/prompt-building copy.
+- `index.html` loads `curriculum.js` before `render.js`, does not require ES modules, and preserves `#chapter-nav` / `#chapter-panel` hooks.
+- Renderer code consumes curriculum data, handles hash state, sets visible active navigation state, renders diagram/flow data, and keeps attention/KV/ViT widget hooks available.
 
-Expected on the pre-implementation baseline: failure, because `curriculum.js` and the data-driven renderer contract are not present yet.
-Expected after Worker 1/UI-content integration: `RESULT PASS validated 19 chapters and static UI contract`.
+Expected integrated result:
 
-## Local server smoke
-
-```bash
-cd llm-visual-warmup
-python3 -m http.server 4173
+```text
+RESULT PASS validated 19 chapters and static UI contract
 ```
 
-Manual QA targets from the test spec: `overview`, `app-bridge`, `tensor-shape`, `attention-mask`, `generation-kv-cache`, `lora-qlora`, `vision-transformer`, `on-device-optimization`, `capstone-map`.
+## 3. Banned-term scan
 
-Expected integrated behavior: sidebar active state changes, one chapter detail panel renders, hash updates, invalid hashes fall back to `overview`, and responsive layout remains usable.
+```bash
+rg -n "Ess''ential|Spec''ialist|Sam''sung|삼''성|pro''mpt guideline|system pro''mpt|as an a''i|웹''사이트를|페''이지를|프''롬프트" llm-visual-warmup \
+  --glob '!verify-static-curriculum.js'
+```
+
+Expected: no matches. The verifier stores the banned patterns in split strings where needed so the scan can ignore the verifier implementation file itself.
+
+## 4. Local HTTP smoke
+
+```bash
+python3 -m http.server 4173 --directory llm-visual-warmup >/tmp/llm-visual-warmup-http.log 2>&1 &
+server_pid=$!
+curl -fsSI --max-time 5 http://127.0.0.1:4173/
+kill "$server_pid"
+```
+
+Expected: HTTP 200 headers for `/`.
+
+Manual QA targets: `overview`, `app-bridge`, `tensor-shape`, `attention-mask`, `generation-kv-cache`, `lora-qlora`, `vision-transformer`, `on-device-optimization`, `capstone-map`.
+
+Expected behavior: sidebar active state changes, one chapter detail panel renders, hash updates, invalid hashes fall back to `overview`, source links render, and the attention/KV/ViT widgets update after render.

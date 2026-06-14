@@ -1,6 +1,6 @@
 # AI Model Internals Static Curriculum
 
-No-dependency static Korean study guide for bridging AI app-layer topics into model-internal topics.
+No-dependency static Korean study guide for moving from AI app-layer topics into model-internal topics: tensors, autograd, modules, data loading, Transformer attention, generation caches, LoRA, vision models, and deployment constraints.
 
 ## Open locally
 
@@ -13,23 +13,25 @@ python3 -m http.server 4173 --directory llm-visual-warmup
 
 ## Files
 
-- `curriculum.js` — content-only `window.AI_STUDY_CURRICULUM` with exactly 19 fixed v1 chapters.
+- `curriculum.js` — content-only `window.AI_STUDY_CURRICULUM` with exactly 19 fixed v1 chapters and per-chapter source metadata.
 - `render.js` — sidebar tab rendering, hash routing, single chapter panel rendering, source map, and widget lifecycle.
-- `styles.css` — static responsive layout and widget styling.
+- `styles.css` — static responsive layout, diagram/flow cards, and widget styling.
 - `script.js` — legacy placeholder kept side-effect free for static checks.
+- `verify-static-curriculum.js` — no-dependency verifier for schema depth, diagram/flow fields, banned-context copy, JS syntax, and UI contract.
 
 ## Verification
 
+Run from the repository root:
+
 ```bash
-python3 - <<'PY'
-from pathlib import Path
-for p in ['llm-visual-warmup/index.html', 'llm-visual-warmup/styles.css']:
-    text = Path(p).read_text(encoding='utf-8')
-    assert text.strip(), f'{p} is empty'
-    print(p, 'lines=', text.count('\n') + 1, 'chars=', len(text))
-print('js_files=', ', '.join(str(p) for p in sorted(Path('llm-visual-warmup').glob('*.js'))))
-PY
 for f in llm-visual-warmup/*.js; do node --check "$f"; done
+node llm-visual-warmup/verify-static-curriculum.js
+rg -n "Ess''ential|Spec''ialist|Sam''sung|삼''성|pro''mpt guideline|system pro''mpt|as an a''i|웹''사이트를|페''이지를|프''롬프트" llm-visual-warmup \
+  --glob '!verify-static-curriculum.js'
+python3 -m http.server 4173 --directory llm-visual-warmup >/tmp/llm-visual-warmup-http.log 2>&1 &
+server_pid=$!
+curl -fsSI --max-time 5 http://127.0.0.1:4173/
+kill "$server_pid"
 ```
 
-Run the PRD/test-spec curriculum schema check to confirm the exact 19 chapter IDs and source schema.
+The `rg` command should produce no matches. The verifier should end with `RESULT PASS validated 19 chapters and static UI contract`.
