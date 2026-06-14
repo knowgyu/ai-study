@@ -45,7 +45,7 @@
     if (type === "attention") {
       return `
         <div class="interactive" data-widget="attention">
-          <label for="attention-step">Query token 위치: <span id="attention-step-label">4</span></label>
+          <label for="attention-step">조회 토큰 위치: <span id="attention-step-label">4</span></label>
           <input id="attention-step" type="range" min="1" max="8" value="4">
           <div id="attention-viz" class="viz attention-viz"></div>
         </div>`;
@@ -53,7 +53,7 @@
     if (type === "kv-cache") {
       return `
         <div class="interactive" data-widget="kv-cache">
-          <label for="kv-step">Decode step: <span id="kv-step-label">5</span></label>
+          <label for="kv-step">생성 단계: <span id="kv-step-label">5</span></label>
           <input id="kv-step" type="range" min="1" max="8" value="5">
           <div id="kv-viz" class="viz kv-viz"></div>
         </div>`;
@@ -61,7 +61,7 @@
     if (type === "vit-patches") {
       return `
         <div class="interactive" data-widget="vit-patches">
-          <label for="patch-step">보이는 patch 수: <span id="patch-step-label">8</span></label>
+          <label for="patch-step">표시할 패치 수: <span id="patch-step-label">8</span></label>
           <input id="patch-step" type="range" min="1" max="16" value="8">
           <div id="vit-viz" class="viz vit-viz"></div>
         </div>`;
@@ -111,46 +111,46 @@
           <p class="lead">${escapeHtml(chapter.oneLiner)}</p>
         </header>
 
-        <section class="summary-grid" aria-label="chapter summary">
-          <div><strong>왜 지금 배우는지</strong><p>${escapeHtml(chapter.whyNow)}</p></div>
-          <div><strong>선행 개념</strong>${chapter.prerequisites && chapter.prerequisites.length ? list(chapter.prerequisites) : "<p>없음. 전체 로드맵에서 시작한다.</p>"}</div>
-          <div><strong>학습 목표</strong>${list(chapter.learningGoals)}</div>
+        <section class="summary-grid" aria-label="장 요약">
+          <div><strong>배울 이유</strong><p>${escapeHtml(chapter.whyNow)}</p></div>
+          <div><strong>먼저 알면 좋은 것</strong>${chapter.prerequisites && chapter.prerequisites.length ? list(chapter.prerequisites) : "<p>없음. 전체 로드맵에서 시작한다.</p>"}</div>
+          <div><strong>읽고 나면 할 수 있는 것</strong>${list(chapter.learningGoals)}</div>
         </section>
 
         <section class="mental-model">
-          <h3>Shape / Flow mental model</h3>
+          <h3>흐름과 모양으로 이해하기</h3>
           <div class="cards three">
-            <article><strong>비유</strong><p>${escapeHtml(chapter.mentalModel.metaphor)}</p></article>
-            <article><strong>흐름</strong><p>${escapeHtml(chapter.mentalModel.flow)}</p></article>
-            <article><strong>Shape</strong><p>${escapeHtml(chapter.mentalModel.shape)}</p></article>
+            <article><strong>직관</strong><p>${escapeHtml(chapter.mentalModel.metaphor)}</p></article>
+            <article><strong>처리 흐름</strong><p>${escapeHtml(chapter.mentalModel.flow)}</p></article>
+            <article><strong>텐서 모양</strong><p>${escapeHtml(chapter.mentalModel.shape)}</p></article>
           </div>
         </section>
 
         ${renderSections(chapter)}
 
         <section class="lab-card">
-          <h3>Mini lab: ${escapeHtml(chapter.lab.title)}</h3>
+          <h3>짧은 실습: ${escapeHtml(chapter.lab.title)}</h3>
           ${list(chapter.lab.steps)}
-          <p><strong>기대 인사이트:</strong> ${escapeHtml(chapter.lab.expectedInsight)}</p>
+          <p><strong>확인할 감각:</strong> ${escapeHtml(chapter.lab.expectedInsight)}</p>
         </section>
 
         <section class="two-col">
           <div class="note-card warning">
-            <h3>초보자 오해</h3>
+            <h3>자주 하는 오해</h3>
             ${list(chapter.misconceptions)}
           </div>
           <div class="note-card check">
-            <h3>Self-check</h3>
+            <h3>스스로 점검하기</h3>
             ${list(chapter.checks)}
           </div>
         </section>
 
         <section class="source-card">
-          <h3>이 장의 출처</h3>
+          <h3>참고한 자료</h3>
           <ul>${sourceLinks(chapter.sources)}</ul>
         </section>
 
-        ${chapter.id === "checklist-sources" ? `<section id="source-map" class="source-map"><h2>전체 source map</h2>${renderSourceMap()}</section>` : ""}
+        ${chapter.id === "checklist-sources" ? `<section id="source-map" class="source-map"><h2>전체 출처 지도</h2>${renderSourceMap()}</section>` : ""}
       </article>
     `;
     initChapterWidgets(chapter.id);
@@ -173,15 +173,15 @@
     if (label) label.textContent = String(step);
     const tokens = Array.from({ length: 8 }, (_, index) => {
       const tokenNumber = index + 1;
-      return `<div class="token ${tokenNumber === step ? "active" : ""}">tok${tokenNumber}</div>`;
+      return `<div class="token ${tokenNumber === step ? "active" : ""}">토큰${tokenNumber}</div>`;
     }).join("");
     const scores = Array.from({ length: 8 }, (_, index) => {
       const tokenNumber = index + 1;
       const visible = tokenNumber <= step;
-      const value = visible ? (0.18 + (step - tokenNumber + 1) * 0.09).toFixed(2) : "mask";
+      const value = visible ? (0.18 + (step - tokenNumber + 1) * 0.09).toFixed(2) : "가림";
       return `<div class="score ${visible ? "visible" : "masked"}">${value}</div>`;
     }).join("");
-    viz.innerHTML = `<div class="token-row">${tokens}</div><div class="score-row">${scores}</div><p class="mini-caption">Query token ${step}은 ${step}개 token만 볼 수 있고 미래 token은 mask 처리된다.</p>`;
+    viz.innerHTML = `<div class="token-row">${tokens}</div><div class="score-row">${scores}</div><p class="mini-caption">조회 토큰 ${step}은 앞의 ${step}개 토큰만 볼 수 있고, 이후 토큰은 가려진다.</p>`;
   }
 
   function renderKv() {
@@ -195,7 +195,7 @@
       const n = index + 1;
       return `<div class="cache-cell k">K${n}</div><div class="cache-cell v">V${n}</div>`;
     }).join("");
-    viz.innerHTML = `${cells}<p class="mini-caption" style="grid-column: 1 / -1">현재 cache에는 ${step}개 token의 K/V가 저장되어 있다.</p>`;
+    viz.innerHTML = `${cells}<p class="mini-caption" style="grid-column: 1 / -1">현재 캐시에는 ${step}개 토큰의 K/V가 저장되어 있다.</p>`;
   }
 
   function renderVit() {
@@ -207,7 +207,7 @@
     if (label) label.textContent = String(visible);
     viz.innerHTML = Array.from({ length: 16 }, (_, index) => {
       const n = index + 1;
-      return `<div class="patch ${n <= visible ? "visible" : ""}">patch ${n}</div>`;
+      return `<div class="patch ${n <= visible ? "visible" : ""}">패치 ${n}</div>`;
     }).join("");
   }
 
