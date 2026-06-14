@@ -63,13 +63,13 @@ const IMPLEMENTATION_HINT_IDS = new Set([
 const REQUIRED_KOREAN_UI_LABELS = [
   'AI Specialist 강의 노트',
   '강의 목차',
-  '배울 이유',
-  '먼저 알면 좋은 것',
-  '흐름과 모양으로 이해하기',
-  '짧은 실습',
+  '핵심 포인트',
+  '선행 개념',
+  '계산 흐름과 shape',
+  '확인 실습',
   '스스로 점검하기',
   '참고한 자료',
-  '전체 출처 지도',
+  '전체 참고 자료',
 ];
 const DISALLOWED_VISIBLE_UI_PHRASES = [
   'AI Specialist Static Curriculum',

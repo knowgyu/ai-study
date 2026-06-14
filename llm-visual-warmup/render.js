@@ -112,26 +112,24 @@
         </header>
 
         <section class="summary-grid" aria-label="장 요약">
-          <div><strong>배울 이유</strong><p>${escapeHtml(chapter.whyNow)}</p></div>
-          <div><strong>먼저 알면 좋은 것</strong>${chapter.prerequisites && chapter.prerequisites.length ? list(chapter.prerequisites) : "<p>없음. 전체 로드맵에서 시작한다.</p>"}</div>
-          <div><strong>읽고 나면 할 수 있는 것</strong>${list(chapter.learningGoals)}</div>
+          <div><strong>핵심 포인트</strong><p>${escapeHtml(chapter.whyNow)}</p></div>
+          <div><strong>선행 개념</strong>${chapter.prerequisites && chapter.prerequisites.length ? list(chapter.prerequisites) : "<p>없음</p>"}</div>
         </section>
 
         <section class="mental-model">
-          <h3>흐름과 모양으로 이해하기</h3>
-          <div class="cards three">
-            <article><strong>직관</strong><p>${escapeHtml(chapter.mentalModel.metaphor)}</p></article>
+          <h3>계산 흐름과 shape</h3>
+          <div class="cards two">
             <article><strong>처리 흐름</strong><p>${escapeHtml(chapter.mentalModel.flow)}</p></article>
-            <article><strong>텐서 모양</strong><p>${escapeHtml(chapter.mentalModel.shape)}</p></article>
+            <article><strong>주요 shape</strong><p>${escapeHtml(chapter.mentalModel.shape)}</p></article>
           </div>
         </section>
 
         ${renderSections(chapter)}
 
         <section class="lab-card">
-          <h3>짧은 실습: ${escapeHtml(chapter.lab.title)}</h3>
+          <h3>확인 실습: ${escapeHtml(chapter.lab.title)}</h3>
           ${list(chapter.lab.steps)}
-          <p><strong>확인할 감각:</strong> ${escapeHtml(chapter.lab.expectedInsight)}</p>
+          <p><strong>확인 포인트:</strong> ${escapeHtml(chapter.lab.expectedInsight)}</p>
         </section>
 
         <section class="two-col">
@@ -150,7 +148,7 @@
           <ul>${sourceLinks(chapter.sources)}</ul>
         </section>
 
-        ${chapter.id === "checklist-sources" ? `<section id="source-map" class="source-map"><h2>전체 출처 지도</h2>${renderSourceMap()}</section>` : ""}
+        ${chapter.id === "checklist-sources" ? `<section id="source-map" class="source-map"><h2>전체 참고 자료</h2>${renderSourceMap()}</section>` : ""}
       </article>
     `;
     initChapterWidgets(chapter.id);
