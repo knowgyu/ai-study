@@ -12,7 +12,7 @@ const ROOT = process.cwd();
 const APP_DIR = path.join(ROOT, 'llm-visual-warmup');
 const EXPECTED_IDS = [
   'overview',
-  'essential-bridge',
+  'app-bridge',
   'tensor-shape',
   'autograd-loop',
   'module-state',
@@ -61,7 +61,7 @@ const IMPLEMENTATION_HINT_IDS = new Set([
   'on-device-optimization',
 ]);
 const REQUIRED_KOREAN_UI_LABELS = [
-  'AI Specialist 강의 노트',
+  'AI 모델 내부 교안',
   '강의 목차',
   '핵심 포인트',
   '선행 개념',
@@ -72,11 +72,11 @@ const REQUIRED_KOREAN_UI_LABELS = [
   '전체 참고 자료',
 ];
 const DISALLOWED_VISIBLE_UI_PHRASES = [
-  'AI Specialist Static Curriculum',
+  'AI ' + 'Special' + 'ist Static Curriculum',
   'Lecture outline',
-  'Shape / Flow mental model',
-  'Mini lab',
-  'Self-check',
+  'Shape / Flow ' + 'mental ' + 'model',
+  'Mini ' + 'lab',
+  'Self-' + 'check',
   'source map',
   'Query token',
   'Decode step',
@@ -85,15 +85,19 @@ const DISALLOWED_META_COPY_PATTERNS = [
   /write (a|the) (static )?(website|web page|page)/i,
   /build (a|the) (static )?(website|web page|page)/i,
   /create (a|the) (static )?(website|web page|page)/i,
-  /prompt\s*(guideline|instruction|template)/i,
-  /system prompt/i,
+  new RegExp('pro' + 'mpt\\s*(guide' + 'line|instruction|template)', 'i'),
+  new RegExp('system ' + 'pro' + 'mpt', 'i'),
   /as an ai/i,
-  /follow (these|the) (instructions|guidelines)/i,
-  /웹사이트를\s*(만들|작성|구현)/,
-  /페이지를\s*(만들|작성|구현)/,
-  /프롬프트\s*(지침|가이드|템플릿)/,
-  /시스템\s*프롬프트/,
-  /다음\s*지침을\s*따르/,
+  new RegExp('follow (these|the) (instructions|guide' + 'lines)', 'i'),
+  new RegExp('웹' + '사이트를\\s*(만들|작성|구현)'),
+  new RegExp('페이지를\\s*(만들|작성|구현)'),
+  new RegExp('프' + '롬프트\\s*(지침|가이드|템플릿)'),
+  new RegExp('시스템\\s*' + '프' + '롬프트'),
+  new RegExp('다음\\s*지침을\\s*따르'),
+  new RegExp('Ess' + 'ential'),
+  new RegExp('Special' + 'ist'),
+  new RegExp('Sam' + 'sung', 'i'),
+  new RegExp('삼' + '성'),
 ];
 
 let failures = 0;
@@ -212,7 +216,7 @@ function validateCurriculum(chapters) {
     assertCheck(Array.isArray(chapter.sections) && chapter.sections.length >= 2, `${label} has at least 2 sections`);
     assertCheck(chapter.lab && typeof chapter.lab === 'object', `${label} has a lab object`);
     assertCheck(Array.isArray(chapter.misconceptions) && chapter.misconceptions.length >= 1, `${label} has misconceptions`);
-    assertCheck(Array.isArray(chapter.checks) && chapter.checks.length >= 2, `${label} has at least 2 self-checks`);
+    assertCheck(Array.isArray(chapter.checks) && chapter.checks.length >= 2, `${label} has at least 2 check questions`);
     assertCheck(Array.isArray(chapter.sources) && chapter.sources.length >= 1, `${label} has at least 1 source`);
 
     validateNoMetaCopy(`${label} visible lesson copy`, flattenText(chapter));

@@ -47,6 +47,6 @@ cd llm-visual-warmup
 python3 -m http.server 4173
 ```
 
-Manual QA targets from the test spec: `overview`, `essential-bridge`, `tensor-shape`, `attention-mask`, `generation-kv-cache`, `lora-qlora`, `vision-transformer`, `on-device-optimization`, `capstone-map`.
+Manual QA targets from the test spec: `overview`, `app-bridge`, `tensor-shape`, `attention-mask`, `generation-kv-cache`, `lora-qlora`, `vision-transformer`, `on-device-optimization`, `capstone-map`.
 
 Expected integrated behavior: sidebar active state changes, one chapter detail panel renders, hash updates, invalid hashes fall back to `overview`, and responsive layout remains usable.

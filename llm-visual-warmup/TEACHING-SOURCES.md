@@ -13,6 +13,6 @@ V1 source map prioritizes official, university, and paper references:
 - Stanford CS224N/CS231N for implementation-heavy NLP and vision pedagogy.
 - ViT and CLIP papers for vision/multimodal foundations.
 - ExecuTorch and ONNX Runtime documentation for on-device/export/quantization topics.
-- OpenAI Structured Outputs and LangGraph documentation for Essential application-layer bridges.
+- OpenAI Structured Outputs and LangGraph documentation for application-layer bridges.
 
 The app renders per-chapter source links and a full source map in the final checklist chapter.

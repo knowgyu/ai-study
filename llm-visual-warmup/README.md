@@ -1,6 +1,6 @@
-# AI Specialist Static Curriculum
+# AI Model Internals Static Curriculum
 
-No-dependency static Korean study guide for bridging AI Essential app-building topics into AI Specialist model-internal topics.
+No-dependency static Korean study guide for bridging AI app-layer topics into model-internal topics.
 
 ## Open locally
 
