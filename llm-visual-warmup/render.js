@@ -41,6 +41,105 @@
     `).join("");
   }
 
+
+  const diagrams = {
+    overview: {
+      title: "전체 학습 지도",
+      caption: "앱 호출 경험에서 시작해 tensor, Transformer, 추론 최적화, 튜닝, Vision, 배포 점검으로 이어진다.",
+      steps: ["앱 호출", "Tensor", "Transformer", "추론/튜닝", "Vision/배포"],
+    },
+    "autograd-loop": {
+      title: "학습 루프와 autograd",
+      caption: "forward로 loss를 만들고, backward가 gradient를 채운 뒤 optimizer가 파라미터를 한 번 갱신한다.",
+      steps: ["batch", "forward", "loss", "backward", "optimizer.step"],
+    },
+    "dataset-loader": {
+      title: "Dataset과 DataLoader 경계",
+      caption: "Dataset은 샘플 하나를 정의하고 DataLoader는 shuffle, batch, collate를 거쳐 모델 입력 묶음을 만든다.",
+      steps: ["files/rows", "Dataset.__getitem__", "shuffle", "collate", "batch [B,...]"],
+    },
+    "token-embedding": {
+      title: "Token에서 embedding까지",
+      caption: "문자열은 token id가 되고, embedding table 조회 후 position 정보가 더해져 [B,T,C] 표현이 된다.",
+      steps: ["text", "token ids [B,T]", "embedding lookup", "+ position", "hidden [B,T,C]"],
+    },
+    "attention-mask": {
+      title: "Q/K/V attention 흐름",
+      caption: "Q는 무엇을 찾는지, K는 어디에 있는지, V는 가져올 내용을 나타내며 causal mask가 미래 token을 막는다.",
+      steps: ["hidden x", "linear → Q K V", "QKᵀ / √D", "+ mask", "softmax · V"],
+    },
+    "multihead-block": {
+      title: "Transformer block 한 층",
+      caption: "LayerNorm, residual, attention, MLP가 반복되며 token별 hidden vector를 조금씩 갱신한다.",
+      steps: ["x", "LN + MHA", "residual", "LN + MLP", "residual out"],
+    },
+    "generation-kv-cache": {
+      title: "KV cache로 줄어드는 반복 계산",
+      caption: "이미 생성한 token의 K/V를 저장하면 다음 token에서는 새 Q와 캐시된 K/V만 조합한다.",
+      steps: ["cached K/V", "new token Q", "read cache", "append K/V", "next logits"],
+    },
+    "lora-qlora": {
+      title: "LoRA adapter 구조",
+      caption: "큰 base weight는 고정하고 작은 A/B adapter만 학습해 적은 파라미터로 task 변화를 더한다.",
+      steps: ["frozen W", "down A", "up B", "scaled ΔW", "W + ΔW"],
+    },
+    "vision-transformer": {
+      title: "ViT patch 처리",
+      caption: "이미지를 작은 patch로 자르고 각 patch를 token처럼 embedding해 Transformer에 넣는다.",
+      steps: ["image", "patch grid", "patch embeddings", "+ CLS/position", "Transformer"],
+    },
+    "data-evaluation": {
+      title: "평가 루프",
+      caption: "고정된 test set과 metric으로 모델 출력을 기록해 회귀와 실제 개선을 구분한다.",
+      steps: ["eval data", "model output", "metric", "error slice", "fix decision"],
+    },
+    "capstone-map": {
+      title: "최종 점검 연결도",
+      caption: "학습, 추론, 데이터, 평가, 배포 제약을 한 장의 의사결정 흐름으로 연결한다.",
+      steps: ["goal", "data", "train/tune", "evaluate", "deploy"],
+    },
+  };
+
+  function renderDiagram(chapterId) {
+    const diagram = diagrams[chapterId];
+    if (!diagram) return "";
+    const width = 900;
+    const height = 210;
+    const gap = 22;
+    const boxWidth = 132;
+    const boxHeight = 56;
+    const startX = 34;
+    const y = 68;
+    const boxes = diagram.steps.map((step, index) => {
+      const x = startX + index * (boxWidth + gap);
+      const arrow = index < diagram.steps.length - 1
+        ? `<path class="diagram-arrow" d="M ${x + boxWidth + 6} ${y + boxHeight / 2} H ${x + boxWidth + gap - 8}" marker-end="url(#arrow-${chapterId})"/>`
+        : "";
+      return `
+        <g class="diagram-node" transform="translate(${x} ${y})">
+          <rect width="${boxWidth}" height="${boxHeight}" rx="12"></rect>
+          <text x="${boxWidth / 2}" y="${boxHeight / 2 + 5}" text-anchor="middle">${escapeHtml(step)}</text>
+        </g>
+        ${arrow}`;
+    }).join("");
+    return `
+      <section class="diagram-card" aria-labelledby="diagram-title-${escapeHtml(chapterId)}">
+        <div class="diagram-copy">
+          <h3 id="diagram-title-${escapeHtml(chapterId)}">${escapeHtml(diagram.title)}</h3>
+          <p>${escapeHtml(diagram.caption)}</p>
+        </div>
+        <svg class="flow-diagram" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeHtml(diagram.title)}">
+          <defs>
+            <marker id="arrow-${escapeHtml(chapterId)}" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M 0 0 L 8 4 L 0 8 z"></path>
+            </marker>
+          </defs>
+          <rect class="diagram-bg" x="10" y="16" width="880" height="178" rx="18"></rect>
+          ${boxes}
+        </svg>
+      </section>`;
+  }
+
   function renderWidget(type) {
     if (type === "attention") {
       return `
@@ -123,6 +222,8 @@
             <article><strong>주요 shape</strong><p>${escapeHtml(chapter.mentalModel.shape)}</p></article>
           </div>
         </section>
+
+        ${renderDiagram(chapter.id)}
 
         ${renderSections(chapter)}
 

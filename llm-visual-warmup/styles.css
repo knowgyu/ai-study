@@ -976,3 +976,65 @@ p {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+.diagram-card {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #ffffff 0%, #f7fafc 100%);
+}
+
+.diagram-copy {
+  display: grid;
+  gap: 6px;
+}
+
+.diagram-copy h3 {
+  font-size: 20px;
+}
+
+.diagram-copy p {
+  color: var(--muted);
+}
+
+.flow-diagram {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.diagram-bg {
+  fill: #f9fbfc;
+  stroke: var(--line);
+}
+
+.diagram-node rect {
+  fill: #fff;
+  stroke: #b9c7d0;
+  stroke-width: 1.5;
+}
+
+.diagram-node:nth-of-type(odd) rect {
+  fill: var(--blue-soft);
+  stroke: #a8c0ee;
+}
+
+.diagram-node text {
+  fill: var(--ink);
+  font-size: 13px;
+  font-weight: 800;
+  dominant-baseline: middle;
+}
+
+.diagram-arrow {
+  fill: none;
+  stroke: var(--blue);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.flow-diagram marker path {
+  fill: var(--blue);
+}
