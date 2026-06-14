@@ -60,6 +60,41 @@ const IMPLEMENTATION_HINT_IDS = new Set([
   'vision-transformer',
   'on-device-optimization',
 ]);
+const REQUIRED_KOREAN_UI_LABELS = [
+  'AI Specialist 강의 노트',
+  '강의 목차',
+  '배울 이유',
+  '먼저 알면 좋은 것',
+  '흐름과 모양으로 이해하기',
+  '짧은 실습',
+  '스스로 점검하기',
+  '참고한 자료',
+  '전체 출처 지도',
+];
+const DISALLOWED_VISIBLE_UI_PHRASES = [
+  'AI Specialist Static Curriculum',
+  'Lecture outline',
+  'Shape / Flow mental model',
+  'Mini lab',
+  'Self-check',
+  'source map',
+  'Query token',
+  'Decode step',
+];
+const DISALLOWED_META_COPY_PATTERNS = [
+  /write (a|the) (static )?(website|web page|page)/i,
+  /build (a|the) (static )?(website|web page|page)/i,
+  /create (a|the) (static )?(website|web page|page)/i,
+  /prompt\s*(guideline|instruction|template)/i,
+  /system prompt/i,
+  /as an ai/i,
+  /follow (these|the) (instructions|guidelines)/i,
+  /웹사이트를\s*(만들|작성|구현)/,
+  /페이지를\s*(만들|작성|구현)/,
+  /프롬프트\s*(지침|가이드|템플릿)/,
+  /시스템\s*프롬프트/,
+  /다음\s*지침을\s*따르/,
+];
 
 let failures = 0;
 
@@ -92,6 +127,20 @@ function readRequired(relativePath) {
   return text;
 }
 
+function flattenText(value) {
+  if (!value) return '';
+  if (typeof value === 'string') return value;
+  if (Array.isArray(value)) return value.map(flattenText).join('\n');
+  if (typeof value === 'object') return Object.values(value).map(flattenText).join('\n');
+  return String(value);
+}
+
+function validateNoMetaCopy(label, text) {
+  for (const pattern of DISALLOWED_META_COPY_PATTERNS) {
+    assertCheck(!pattern.test(text), `${label} does not contain website/prompt-building meta copy: ${pattern}`);
+  }
+}
+
 function hasCodeLikeContent(value) {
   if (!value) return false;
   if (typeof value === 'string') {
@@ -104,6 +153,7 @@ function hasCodeLikeContent(value) {
 
 function validateStaticFiles() {
   readRequired('llm-visual-warmup/index.html');
+  readRequired('llm-visual-warmup/render.js');
   readRequired('llm-visual-warmup/styles.css');
   const jsFiles = fs.existsSync(APP_DIR)
     ? fs.readdirSync(APP_DIR).filter((file) => file.endsWith('.js')).sort()
@@ -165,6 +215,8 @@ function validateCurriculum(chapters) {
     assertCheck(Array.isArray(chapter.checks) && chapter.checks.length >= 2, `${label} has at least 2 self-checks`);
     assertCheck(Array.isArray(chapter.sources) && chapter.sources.length >= 1, `${label} has at least 1 source`);
 
+    validateNoMetaCopy(`${label} visible lesson copy`, flattenText(chapter));
+
     if (IMPLEMENTATION_HINT_IDS.has(chapter.id)) {
       assertCheck(hasCodeLikeContent(chapter.sections) || hasCodeLikeContent(chapter.lab), `${label} includes code or pseudo-code guidance`);
     }
@@ -212,6 +264,18 @@ function validateUiContract() {
   assertCheck(/(querySelector|createElement)\([^)]*(toc|sidebar|chapter-list|nav)|\.toc|data-chapter-id/.test(combinedJs), 'renderer targets generated sidebar/navigation');
   assertCheck(/(querySelector|createElement)\([^)]*(chapter|detail|main)|chapter-detail|data-chapter-id/.test(combinedJs), 'renderer targets a chapter detail panel');
   assertCheck(/attention-step|kv-step|patch-step/.test(html + combinedJs), 'attention/KV/ViT widget hooks are present when widgets are shipped');
+  assertCheck(/chapter-nav/.test(html) && /data-chapter-id/.test(combinedJs), 'sidebar navigation hook is preserved');
+  assertCheck(/location\.hash|hashchange/.test(combinedJs), 'hash navigation hook is preserved');
+
+  const renderJs = fs.readFileSync(path.join(APP_DIR, 'render.js'), 'utf8');
+  const visibleUiSource = `${html}\n${renderJs}`;
+  for (const label of REQUIRED_KOREAN_UI_LABELS) {
+    assertCheck(visibleUiSource.includes(label), `visible UI includes Korean label: ${label}`);
+  }
+  for (const phrase of DISALLOWED_VISIBLE_UI_PHRASES) {
+    assertCheck(!visibleUiSource.includes(phrase), `visible UI avoids awkward English label: ${phrase}`);
+  }
+  validateNoMetaCopy('static UI files', visibleUiSource);
 }
 
 validateStaticFiles();
