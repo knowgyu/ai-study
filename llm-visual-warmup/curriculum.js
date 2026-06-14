@@ -7,8 +7,9 @@ window.AI_STUDY_CURRICULUM = [
     "whyNow": "이 교안은 이전 내용을 전부 기억한다는 전제를 두지 않는다. 필요한 앱 레이어 개념을 짧게 복습하고, 곧바로 모델 내부 계산으로 이어지게 구성한다.",
     "prerequisites": [],
     "learningGoals": [
-      "AI 모델 내부 학습 로드맵에서 꼭 알아야 할 입력·출력과 계산 흐름을 설명한다.",
-      "코드 조각을 보고 shape 변화와 흔한 오류를 짚는다."
+      "AI 모델 내부 학습 로드맵의 입력, 출력, 비용 기준을 초보자 언어로 설명한다.",
+      "AI 모델 내부 학습 로드맵의 핵심 shape를 코드 출력과 연결한다.",
+      "작은 PyTorch 또는 의사코드 예제로 같은 원리를 재현한다."
     ],
     "mentalModel": {
       "conceptNote": "먼저 학습 순서를 잡고, 각 장에서 입력·출력·비용 기준을 확인한다.",
@@ -26,28 +27,60 @@ window.AI_STUDY_CURRICULUM = [
         ]
       },
       {
-        "heading": "기초 복습",
-        "body": "이전 내용을 자세히 기억하지 못해도 이 항목부터 다시 잡으면 된다.",
+        "heading": "처음 보는 사람을 위한 용어 정리",
+        "body": "모델 내부를 공부할 때는 용어를 외우기보다 데이터가 어떤 모양으로 들어가고 어떤 비용으로 나오는지 추적한다.",
         "bullets": [
-          "이전 앱 제작 경험은 모델 호출 결과를 보는 데 도움이 된다.",
-          "이 교안에서는 화면보다 계산 단위를 먼저 본다.",
-          "각 장은 입력, 출력, 비용, 흔한 오류를 함께 다룬다.",
-          "모르는 용어가 나와도 해당 장의 확인 질문으로 되돌아가면 된다."
+          "사용자 입력 → 토큰화 → tensor → embedding → attention/MLP 반복 → logits → 디코딩",
+          "문장 하나는 token id [T], 묶음 처리는 [B,T], 모델 내부 표현은 [B,T,C]로 읽는다.",
+          "모르는 기호가 나오면 이 장의 shape 문장을 먼저 다시 읽는다."
         ]
       },
       {
-        "heading": "앱 호출 아래의 계산 흐름",
-        "body": "LLM 앱 호출 뒤에는 항상 tensor 계산과 sampling 정책이 있다.",
-        "code": "response = agent.invoke(user_query) # 내부에는 tokenize → model forward → decode → tool/RAG orchestration 흐름이 숨어 있다."
+        "heading": "수업 판서처럼 따라가는 계산 흐름",
+        "body": "아래 순서대로 손으로 화살표를 그리면 코드가 어떤 tensor를 만들고 넘기는지 빠르게 보인다.",
+        "bullets": [
+          "사용자 입력",
+          "토큰화",
+          "tensor",
+          "embedding",
+          "attention/MLP 반복",
+          "logits",
+          "디코딩"
+        ]
+      },
+      {
+        "heading": "작은 코드로 확인하기",
+        "body": "큰 기능을 바로 쓰기보다, 같은 원리를 작은 tensor와 짧은 코드로 먼저 확인한다. 실행 결과의 값보다 shape와 dtype을 먼저 출력한다.",
+        "code": "text = \"오늘 배울 내용\"\nids = tokenizer.encode(text)        # 길이 T의 정수 목록\nx = embedding(torch.tensor(ids))    # [T, C]\nlogits = model(x.unsqueeze(0))      # [1, T, V]"
+      },
+      {
+        "heading": "초보자가 자주 놓치는 지점",
+        "body": "구현이 돌아가도 학습이 안 되거나 답이 이상할 때는 아래 항목부터 점검한다.",
+        "bullets": [
+          "API 결과만 보고 내부 계산을 생략하면 오류 원인을 찾기 어렵다.",
+          "학습 속도와 답변 속도는 병목이 다르다.",
+          "각 장의 기호 B,T,C,V를 매번 다시 확인한다."
+        ]
+      },
+      {
+        "heading": "다음 장으로 넘어가기 전 확인",
+        "body": "한 장을 끝낼 때는 정의를 외웠는지가 아니라, 입력과 출력, 비용, 실패 원인을 말할 수 있는지 확인한다.",
+        "bullets": [
+          "입력 tensor 또는 자료 구조를 말할 수 있다.",
+          "출력의 shape와 의미를 말할 수 있다.",
+          "가장 흔한 오류 하나와 확인 방법을 말할 수 있다."
+        ]
       }
     ],
     "lab": {
       "title": "개인 로드맵 그리기",
       "steps": [
         "아는 주제와 낯선 주제를 표시한다.",
-        "각 장의 최소 성공 문장을 한 줄로 쓴다."
+        "각 장의 최소 성공 문장을 한 줄로 쓴다.",
+        "관련 코드 조각에서 shape 주석을 직접 붙인다.",
+        "실패할 수 있는 입력 예시를 하나 만들고 원인을 적는다."
       ],
-      "expectedInsight": "전체 과정이 앱 개발, 모델 구현, 배포 최적화로 이어진다는 그림을 얻는다."
+      "expectedInsight": "전체 과정이 앱 개발, 모델 구현, 배포 최적화로 이어진다는 그림을 얻는다. 수업 후에는 같은 주제를 작은 입력으로 직접 재현할 수 있어야 한다."
     },
     "misconceptions": [
       "모델 내부 학습을 화면 구현이나 서비스 포장 문제로만 보면 tensor shape, gradient, attention 비용을 놓친다."
@@ -83,8 +116,9 @@ window.AI_STUDY_CURRICULUM = [
     "whyNow": "이전에 배운 앱 레이어를 완전히 기억하지 못해도 이후 장을 읽을 수 있도록, 검색·도구·구조화 출력과 모델 forward의 경계를 다시 잡는다.",
     "prerequisites": [],
     "learningGoals": [
-      "Agent·RAG·LangGraph 기초 복습과 모델 내부에서 꼭 알아야 할 입력·출력과 계산 흐름을 설명한다.",
-      "코드 조각을 보고 shape 변화와 흔한 오류를 짚는다."
+      "Agent·RAG·LangGraph 기초 복습과 모델 내부의 입력, 출력, 비용 기준을 초보자 언어로 설명한다.",
+      "Agent·RAG·LangGraph 기초 복습과 모델 내부의 핵심 shape를 코드 출력과 연결한다.",
+      "작은 PyTorch 또는 의사코드 예제로 같은 원리를 재현한다."
     ],
     "mentalModel": {
       "conceptNote": "앱 레이어는 모델을 호출하고 검증하는 흐름이고, 모델 내부는 token ids를 받아 logits를 만드는 계산이다.",
@@ -101,29 +135,58 @@ window.AI_STUDY_CURRICULUM = [
         ]
       },
       {
-        "heading": "기초 복습",
-        "body": "이전 내용을 자세히 기억하지 못해도 이 항목부터 다시 잡으면 된다.",
+        "heading": "처음 보는 사람을 위한 용어 정리",
+        "body": "RAG나 agent는 모델을 감싸는 실행 절차이고, nn.Module 내부 layer가 아니다. 검색 품질과 생성 품질을 분리해야 디버깅이 가능하다.",
         "bullets": [
-          "RAG는 외부 문서를 prompt에 넣는 방법이지 모델 weight를 바꾸는 방법이 아니다.",
-          "Agent는 tool을 고르고 실행 순서를 관리한다.",
-          "구조화 출력은 JSON 형태를 안정화하지만 사실성을 보장하지 않는다.",
-          "모델 내부 학습에서는 token id, embedding, logits, loss가 중심이다.",
-          "문제가 생기면 검색 문제인지 생성 문제인지 먼저 나눈다."
+          "질문 → 검색/도구 선택 → 컨텍스트 구성 → 모델 forward → 형식 검증/평가",
+          "검색 결과는 문서 목록, 모델 입력은 token ids [B,T], 모델 출력은 어휘 점수 logits [B,T,V]다.",
+          "모르는 기호가 나오면 이 장의 shape 문장을 먼저 다시 읽는다."
         ]
       },
       {
-        "heading": "실패 분류 실습",
-        "body": "같은 질문에서 검색 실패와 모델 추론 실패를 분리해 기록한다.",
-        "code": "trace = {'retrieved': docs, 'context_tokens': n, 'answer': answer} assert len(trace['retrieved']) > 0"
+        "heading": "수업 판서처럼 따라가는 계산 흐름",
+        "body": "아래 순서대로 손으로 화살표를 그리면 코드가 어떤 tensor를 만들고 넘기는지 빠르게 보인다.",
+        "bullets": [
+          "질문",
+          "검색/도구 선택",
+          "컨텍스트 구성",
+          "모델 forward",
+          "형식 검증/평가"
+        ]
+      },
+      {
+        "heading": "작은 코드로 확인하기",
+        "body": "큰 기능을 바로 쓰기보다, 같은 원리를 작은 tensor와 짧은 코드로 먼저 확인한다. 실행 결과의 값보다 shape와 dtype을 먼저 출력한다.",
+        "code": "docs = retriever.search(query)\ncontext = \"\n\".join(d.text for d in docs[:3])\nids = tokenizer.encode(context + \"\n\" + query)\n# 이후부터는 일반 언어 모델 forward 문제로 바뀐다."
+      },
+      {
+        "heading": "초보자가 자주 놓치는 지점",
+        "body": "구현이 돌아가도 학습이 안 되거나 답이 이상할 때는 아래 항목부터 점검한다.",
+        "bullets": [
+          "검색 결과가 비어 있는데 모델만 바꾸려 하면 문제가 해결되지 않는다.",
+          "형식이 맞는 답변이 항상 사실인 것은 아니다.",
+          "도구 실행 흐름과 모델 layer를 같은 것으로 보지 않는다."
+        ]
+      },
+      {
+        "heading": "다음 장으로 넘어가기 전 확인",
+        "body": "한 장을 끝낼 때는 정의를 외웠는지가 아니라, 입력과 출력, 비용, 실패 원인을 말할 수 있는지 확인한다.",
+        "bullets": [
+          "입력 tensor 또는 자료 구조를 말할 수 있다.",
+          "출력의 shape와 의미를 말할 수 있다.",
+          "가장 흔한 오류 하나와 확인 방법을 말할 수 있다."
+        ]
       }
     ],
     "lab": {
       "title": "RAG 실패 분류표",
       "steps": [
         "최근 만든 RAG 예제를 떠올린다.",
-        "검색 실패, 컨텍스트 구성 실패, model decoding 실패로 나눈다."
+        "검색 실패, 컨텍스트 구성 실패, model decoding 실패로 나눈다.",
+        "관련 코드 조각에서 shape 주석을 직접 붙인다.",
+        "실패할 수 있는 입력 예시를 하나 만들고 원인을 적는다."
       ],
-      "expectedInsight": "앱 레이어 문제와 모델 내부 문제를 분리한다."
+      "expectedInsight": "앱 레이어 문제와 모델 내부 문제를 분리한다. 수업 후에는 같은 주제를 작은 입력으로 직접 재현할 수 있어야 한다."
     },
     "misconceptions": [
       "Agent를 쓰면 모델 내부 이해가 필요 없어질 것이라고 오해하기 쉽다."
@@ -162,8 +225,9 @@ window.AI_STUDY_CURRICULUM = [
       "배열/행렬 기초"
     ],
     "learningGoals": [
-      "Tensor와 shape 읽기에서 꼭 알아야 할 입력·출력과 계산 흐름을 설명한다.",
-      "코드 조각을 보고 shape 변화와 흔한 오류를 짚는다."
+      "Tensor와 shape 읽기의 입력, 출력, 비용 기준을 초보자 언어로 설명한다.",
+      "Tensor와 shape 읽기의 핵심 shape를 코드 출력과 연결한다.",
+      "작은 PyTorch 또는 의사코드 예제로 같은 원리를 재현한다."
     ],
     "mentalModel": {
       "conceptNote": "shape 표기는 코드의 타입 정보처럼 읽는다. 축 이름이 바뀌면 연산 의미도 바뀐다.",
@@ -177,23 +241,45 @@ window.AI_STUDY_CURRICULUM = [
         "code": "x = torch.randn(B, T, C)\nqkv = linear(x).view(B, T, 3, H, D)\nq, k, v = qkv.unbind(dim=2)\nq = q.transpose(1, 2)  # [B, H, T, D]"
       },
       {
-        "heading": "기초 복습",
-        "body": "이전 내용을 자세히 기억하지 못해도 이 항목부터 다시 잡으면 된다.",
+        "heading": "처음 보는 사람을 위한 용어 정리",
+        "body": "Tensor는 숫자 배열이고 shape는 그 배열의 축 의미다. PyTorch 초보자는 값보다 먼저 축 이름을 적는 습관을 들이면 좋다.",
         "bullets": [
-          "B는 한 번에 처리하는 예제 수다.",
-          "T는 sequence 길이 또는 token 수다.",
-          "C는 token 하나가 가진 hidden vector 크기다.",
-          "H는 attention head 수, D는 head 하나의 차원이다.",
-          "C = H × D가 맞아야 head split이 가능하다.",
-          "shape가 맞아도 축 의미가 틀리면 결과는 틀릴 수 있다."
+          "원본 batch → embedding [B,T,C] → head 분리 [B,H,T,D] → attention score [B,H,T,T]",
+          "B=batch, T=token 수, C=hidden 크기, H=head 수, D=head별 크기이며 보통 C=H×D다.",
+          "모르는 기호가 나오면 이 장의 shape 문장을 먼저 다시 읽는다."
         ]
       },
       {
-        "heading": "Shape 흐름",
-        "body": "matmul은 마지막 두 축을 행렬곱으로 보고 앞 축은 batch처럼 유지한다.",
+        "heading": "수업 판서처럼 따라가는 계산 흐름",
+        "body": "아래 순서대로 손으로 화살표를 그리면 코드가 어떤 tensor를 만들고 넘기는지 빠르게 보인다.",
         "bullets": [
-          "q @ kᵀ → token-to-token score",
-          "mask는 broadcast되므로 shape 확인이 필수"
+          "원본 batch",
+          "embedding [B,T,C]",
+          "head 분리 [B,H,T,D]",
+          "attention score [B,H,T,T]"
+        ]
+      },
+      {
+        "heading": "작은 코드로 확인하기",
+        "body": "큰 기능을 바로 쓰기보다, 같은 원리를 작은 tensor와 짧은 코드로 먼저 확인한다. 실행 결과의 값보다 shape와 dtype을 먼저 출력한다.",
+        "code": "import torch\nB,T,C,H = 2,4,12,3\nD = C // H\nx = torch.randn(B,T,C)\nheads = x.view(B,T,H,D).transpose(1,2)\nprint(heads.shape)  # torch.Size([2, 3, 4, 4])"
+      },
+      {
+        "heading": "초보자가 자주 놓치는 지점",
+        "body": "구현이 돌아가도 학습이 안 되거나 답이 이상할 때는 아래 항목부터 점검한다.",
+        "bullets": [
+          "view 전에 메모리 연속성이 깨졌으면 contiguous가 필요할 수 있다.",
+          "shape가 맞아도 축 순서가 틀리면 조용히 나쁜 결과가 나온다.",
+          "broadcast는 편하지만 mask 오류를 숨길 수 있다."
+        ]
+      },
+      {
+        "heading": "다음 장으로 넘어가기 전 확인",
+        "body": "한 장을 끝낼 때는 정의를 외웠는지가 아니라, 입력과 출력, 비용, 실패 원인을 말할 수 있는지 확인한다.",
+        "bullets": [
+          "입력 tensor 또는 자료 구조를 말할 수 있다.",
+          "출력의 shape와 의미를 말할 수 있다.",
+          "가장 흔한 오류 하나와 확인 방법을 말할 수 있다."
         ]
       }
     ],
@@ -202,9 +288,11 @@ window.AI_STUDY_CURRICULUM = [
       "steps": [
         "torch.randn(2,4,12)를 만든다.",
         "head=3으로 [2,3,4,4]를 만든다.",
-        "transpose 전후 stride를 출력한다."
+        "transpose 전후 stride를 출력한다.",
+        "관련 코드 조각에서 shape 주석을 직접 붙인다.",
+        "실패할 수 있는 입력 예시를 하나 만들고 원인을 적는다."
       ],
-      "expectedInsight": "shape 출력만으로 attention 코드 의도를 추론한다."
+      "expectedInsight": "shape 출력만으로 attention 코드 의도를 추론한다. 수업 후에는 같은 주제를 작은 입력으로 직접 재현할 수 있어야 한다."
     },
     "misconceptions": [
       "reshape는 항상 안전하고 의미 보존된다고 오해하기 쉽다."
@@ -242,8 +330,9 @@ window.AI_STUDY_CURRICULUM = [
       "tensor-shape"
     ],
     "learningGoals": [
-      "Autograd와 학습 루프에서 꼭 알아야 할 입력·출력과 계산 흐름을 설명한다.",
-      "코드 조각을 보고 shape 변화와 흔한 오류를 짚는다."
+      "Autograd와 학습 루프의 입력, 출력, 비용 기준을 초보자 언어로 설명한다.",
+      "Autograd와 학습 루프의 핵심 shape를 코드 출력과 연결한다.",
+      "작은 PyTorch 또는 의사코드 예제로 같은 원리를 재현한다."
     ],
     "mentalModel": {
       "conceptNote": "Autograd는 forward 계산 그래프를 저장하고 backward에서 parameter.grad를 채운다.",
@@ -257,22 +346,48 @@ window.AI_STUDY_CURRICULUM = [
         "code": "for x, y in loader:\n    logits = model(x)\n    loss = F.cross_entropy(logits.view(-1, V), y.view(-1))\n    optimizer.zero_grad()\n    loss.backward()\n    optimizer.step()"
       },
       {
-        "heading": "기초 복습",
-        "body": "이전 내용을 자세히 기억하지 못해도 이 항목부터 다시 잡으면 된다.",
+        "heading": "처음 보는 사람을 위한 용어 정리",
+        "body": "Autograd는 loss에서 출발해 계산 그래프를 거꾸로 따라가며 각 파라미터의 gradient를 채운다.",
         "bullets": [
-          "forward는 예측값과 loss를 만든다.",
-          "backward는 requires_grad=True인 parameter의 grad를 채운다.",
-          "optimizer.step은 grad를 보고 parameter를 바꾼다.",
-          "zero_grad를 빼면 이전 batch의 gradient가 누적된다.",
-          "eval은 layer 동작 모드이고 no_grad는 graph 기록 중단이다."
+          "batch → forward → loss → zero_grad → backward → optimizer.step → 기록",
+          "모델 출력 logits [B,T,V]와 정답 y [B,T]를 loss 함수가 비교해 scalar loss를 만든다.",
+          "모르는 기호가 나오면 이 장의 shape 문장을 먼저 다시 읽는다."
         ]
       },
       {
-        "heading": "실무 연결",
-        "body": "inference에서는 no_grad로 그래프 생성을 끄고, fine-tuning에서는 일부 weight만 학습한다.",
+        "heading": "수업 판서처럼 따라가는 계산 흐름",
+        "body": "아래 순서대로 손으로 화살표를 그리면 코드가 어떤 tensor를 만들고 넘기는지 빠르게 보인다.",
         "bullets": [
-          "model.eval()은 gradient off가 아니다",
-          "zero_grad 누락은 누적 버그를 만든다"
+          "batch",
+          "forward",
+          "loss",
+          "zero_grad",
+          "backward",
+          "optimizer.step",
+          "기록"
+        ]
+      },
+      {
+        "heading": "작은 코드로 확인하기",
+        "body": "큰 기능을 바로 쓰기보다, 같은 원리를 작은 tensor와 짧은 코드로 먼저 확인한다. 실행 결과의 값보다 shape와 dtype을 먼저 출력한다.",
+        "code": "optimizer.zero_grad()\nlogits = model(input_ids)\nloss = torch.nn.functional.cross_entropy(logits.view(-1, V), targets.view(-1))\nloss.backward()\noptimizer.step()"
+      },
+      {
+        "heading": "초보자가 자주 놓치는 지점",
+        "body": "구현이 돌아가도 학습이 안 되거나 답이 이상할 때는 아래 항목부터 점검한다.",
+        "bullets": [
+          "zero_grad를 빼면 이전 gradient가 누적된다.",
+          "loss.backward 뒤에 바로 step을 하지 않으면 파라미터가 바뀌지 않는다.",
+          "평가 중에는 torch.no_grad를 써서 불필요한 그래프 생성을 막는다."
+        ]
+      },
+      {
+        "heading": "다음 장으로 넘어가기 전 확인",
+        "body": "한 장을 끝낼 때는 정의를 외웠는지가 아니라, 입력과 출력, 비용, 실패 원인을 말할 수 있는지 확인한다.",
+        "bullets": [
+          "입력 tensor 또는 자료 구조를 말할 수 있다.",
+          "출력의 shape와 의미를 말할 수 있다.",
+          "가장 흔한 오류 하나와 확인 방법을 말할 수 있다."
         ]
       }
     ],
@@ -281,9 +396,11 @@ window.AI_STUDY_CURRICULUM = [
       "steps": [
         "Linear 회귀를 만든다.",
         "backward 전후 weight.grad를 출력한다.",
-        "zero_grad를 빼고 차이를 본다."
+        "zero_grad를 빼고 차이를 본다.",
+        "관련 코드 조각에서 shape 주석을 직접 붙인다.",
+        "실패할 수 있는 입력 예시를 하나 만들고 원인을 적는다."
       ],
-      "expectedInsight": "학습 루프의 위생 규칙을 이해한다."
+      "expectedInsight": "학습 루프의 위생 규칙을 이해한다. 수업 후에는 같은 주제를 작은 입력으로 직접 재현할 수 있어야 한다."
     },
     "misconceptions": [
       "loss.backward가 파라미터 값을 직접 바꾼다고 오해하기 쉽다."
@@ -321,8 +438,9 @@ window.AI_STUDY_CURRICULUM = [
       "autograd-loop"
     ],
     "learningGoals": [
-      "nn.Module, state_dict, train/eval에서 꼭 알아야 할 입력·출력과 계산 흐름을 설명한다.",
-      "코드 조각을 보고 shape 변화와 흔한 오류를 짚는다."
+      "nn.Module, state_dict, train/eval의 입력, 출력, 비용 기준을 초보자 언어로 설명한다.",
+      "nn.Module, state_dict, train/eval의 핵심 shape를 코드 출력과 연결한다.",
+      "작은 PyTorch 또는 의사코드 예제로 같은 원리를 재현한다."
     ],
     "mentalModel": {
       "conceptNote": "Module은 layer 등록, forward 계약, state_dict 저장 규칙을 묶는 단위다.",
@@ -336,22 +454,45 @@ window.AI_STUDY_CURRICULUM = [
         "code": "class Block(nn.Module): def __init__(self): super().__init__() self.attn = SelfAttention() self.mlp = MLP() def forward(self, x): x = x + self.attn(norm(x)) return x + self.mlp(norm(x))"
       },
       {
-        "heading": "기초 복습",
-        "body": "이전 내용을 자세히 기억하지 못해도 이 항목부터 다시 잡으면 된다.",
+        "heading": "처음 보는 사람을 위한 용어 정리",
+        "body": "nn.Module은 파라미터와 forward 규칙을 한 곳에 묶는 단위다. state_dict는 학습된 숫자들을 저장하는 표준 방식이다.",
         "bullets": [
-          "nn.Module의 attribute로 등록한 layer만 parameters와 state_dict에 잡힌다.",
-          "forward는 layer를 새로 만드는 곳이 아니라 데이터 흐름을 연결하는 곳이다.",
-          "state_dict는 tensor 값 묶음이고 class 정의 자체는 아니다.",
-          "train/eval은 Dropout, BatchNorm처럼 모드가 있는 layer 때문에 필요하다.",
-          "checkpoint를 읽을 때는 이름과 shape가 맞는지 확인해야 한다."
+          "__init__에서 layer 정의 → forward에서 계산 연결 → state_dict 저장/로드 → train/eval 모드 전환",
+          "Linear는 마지막 축을 변환한다. 예를 들어 [B,T,C]에 Linear(C,V)를 적용하면 [B,T,V]가 된다.",
+          "모르는 기호가 나오면 이 장의 shape 문장을 먼저 다시 읽는다."
         ]
       },
       {
-        "heading": "train/eval 구분",
-        "body": "Dropout, BatchNorm처럼 모드별 동작이 있는 layer 때문에 train/eval 전환이 필요하다.",
+        "heading": "수업 판서처럼 따라가는 계산 흐름",
+        "body": "아래 순서대로 손으로 화살표를 그리면 코드가 어떤 tensor를 만들고 넘기는지 빠르게 보인다.",
         "bullets": [
-          "model(x) 호출은 hook을 통과한다",
-          "state_dict는 class 정의 자체가 아니다"
+          "__init__에서 layer 정의",
+          "forward에서 계산 연결",
+          "state_dict 저장/로드",
+          "train/eval 모드 전환"
+        ]
+      },
+      {
+        "heading": "작은 코드로 확인하기",
+        "body": "큰 기능을 바로 쓰기보다, 같은 원리를 작은 tensor와 짧은 코드로 먼저 확인한다. 실행 결과의 값보다 shape와 dtype을 먼저 출력한다.",
+        "code": "class TinyHead(torch.nn.Module):\n    def __init__(self, C, V):\n        super().__init__()\n        self.proj = torch.nn.Linear(C, V)\n    def forward(self, x):\n        return self.proj(x)  # [B,T,C] -> [B,T,V]"
+      },
+      {
+        "heading": "초보자가 자주 놓치는 지점",
+        "body": "구현이 돌아가도 학습이 안 되거나 답이 이상할 때는 아래 항목부터 점검한다.",
+        "bullets": [
+          "Module을 만들고 forward를 호출하지 않으면 계산은 일어나지 않는다.",
+          "model.eval은 gradient를 끄지 않는다. 평가에서는 no_grad도 함께 쓴다.",
+          "state_dict에는 코드 구조가 아니라 tensor 값이 들어간다."
+        ]
+      },
+      {
+        "heading": "다음 장으로 넘어가기 전 확인",
+        "body": "한 장을 끝낼 때는 정의를 외웠는지가 아니라, 입력과 출력, 비용, 실패 원인을 말할 수 있는지 확인한다.",
+        "bullets": [
+          "입력 tensor 또는 자료 구조를 말할 수 있다.",
+          "출력의 shape와 의미를 말할 수 있다.",
+          "가장 흔한 오류 하나와 확인 방법을 말할 수 있다."
         ]
       }
     ],
@@ -360,9 +501,11 @@ window.AI_STUDY_CURRICULUM = [
       "steps": [
         "TinyMLP를 만든다.",
         "named_parameters를 출력한다.",
-        "Python list와 ModuleList 차이를 비교한다."
+        "Python list와 ModuleList 차이를 비교한다.",
+        "관련 코드 조각에서 shape 주석을 직접 붙인다.",
+        "실패할 수 있는 입력 예시를 하나 만들고 원인을 적는다."
       ],
-      "expectedInsight": "파라미터 누락 버그를 피한다."
+      "expectedInsight": "파라미터 누락 버그를 피한다. 수업 후에는 같은 주제를 작은 입력으로 직접 재현할 수 있어야 한다."
     },
     "misconceptions": [
       "forward 안에서 새 layer를 만들면 학습된다고 오해하기 쉽다."
@@ -400,8 +543,9 @@ window.AI_STUDY_CURRICULUM = [
       "module-state"
     ],
     "learningGoals": [
-      "Dataset, DataLoader, collate, split에서 꼭 알아야 할 입력·출력과 계산 흐름을 설명한다.",
-      "코드 조각을 보고 shape 변화와 흔한 오류를 짚는다."
+      "Dataset, DataLoader, collate, split의 입력, 출력, 비용 기준을 초보자 언어로 설명한다.",
+      "Dataset, DataLoader, collate, split의 핵심 shape를 코드 출력과 연결한다.",
+      "작은 PyTorch 또는 의사코드 예제로 같은 원리를 재현한다."
     ],
     "mentalModel": {
       "conceptNote": "Dataset은 sample 계약, DataLoader는 batch 계약, collate는 묶는 규칙이다.",
@@ -415,22 +559,46 @@ window.AI_STUDY_CURRICULUM = [
         "code": "class TextDataset(Dataset):\n    def __getitem__(self, i):\n        chunk = ids[i:i + block_size + 1]\n        return chunk[:-1], chunk[1:]"
       },
       {
-        "heading": "기초 복습",
-        "body": "이전 내용을 자세히 기억하지 못해도 이 항목부터 다시 잡으면 된다.",
+        "heading": "처음 보는 사람을 위한 용어 정리",
+        "body": "Dataset은 샘플 하나를 어떻게 꺼낼지, DataLoader는 여러 샘플을 어떻게 섞고 묶을지를 담당한다.",
         "bullets": [
-          "Dataset은 index 하나를 sample 하나로 바꾼다.",
-          "DataLoader는 여러 sample을 batch로 묶는다.",
-          "길이가 다른 sequence는 padding 또는 custom collate가 필요하다.",
-          "학습/검증 split이 섞이면 평가 점수가 실제보다 좋아진다.",
-          "첫 batch의 x/y shape를 출력하는 습관이 중요하다."
+          "파일/행 데이터 → Dataset.__getitem__ → shuffle → collate_fn → batch tensor",
+          "샘플 하나가 [T]라면 batch는 보통 [B,T]가 된다. 길이가 다르면 padding과 attention mask가 필요하다.",
+          "모르는 기호가 나오면 이 장의 shape 문장을 먼저 다시 읽는다."
         ]
       },
       {
-        "heading": "collate와 데이터 분리",
-        "body": "길이가 다른 sequence는 padding/collate가 필요하고, 평가는 leakage 없는 split이 중요하다.",
+        "heading": "수업 판서처럼 따라가는 계산 흐름",
+        "body": "아래 순서대로 손으로 화살표를 그리면 코드가 어떤 tensor를 만들고 넘기는지 빠르게 보인다.",
         "bullets": [
-          "shuffle은 DataLoader 책임",
-          "collate_fn은 batch 규칙"
+          "파일/행 데이터",
+          "Dataset.__getitem__",
+          "shuffle",
+          "collate_fn",
+          "batch tensor"
+        ]
+      },
+      {
+        "heading": "작은 코드로 확인하기",
+        "body": "큰 기능을 바로 쓰기보다, 같은 원리를 작은 tensor와 짧은 코드로 먼저 확인한다. 실행 결과의 값보다 shape와 dtype을 먼저 출력한다.",
+        "code": "def collate(batch):\n    ids = [torch.tensor(x[\"ids\"]) for x in batch]\n    padded = torch.nn.utils.rnn.pad_sequence(ids, batch_first=True, padding_value=0)\n    mask = padded.ne(0)\n    return {\"input_ids\": padded, \"attention_mask\": mask}"
+      },
+      {
+        "heading": "초보자가 자주 놓치는 지점",
+        "body": "구현이 돌아가도 학습이 안 되거나 답이 이상할 때는 아래 항목부터 점검한다.",
+        "bullets": [
+          "학습/검증 데이터가 섞이면 점수가 실제보다 좋아 보인다.",
+          "길이가 다른 문장을 그냥 stack하면 오류가 난다.",
+          "shuffle은 학습에는 보통 유리하지만 평가 재현성에는 주의가 필요하다."
+        ]
+      },
+      {
+        "heading": "다음 장으로 넘어가기 전 확인",
+        "body": "한 장을 끝낼 때는 정의를 외웠는지가 아니라, 입력과 출력, 비용, 실패 원인을 말할 수 있는지 확인한다.",
+        "bullets": [
+          "입력 tensor 또는 자료 구조를 말할 수 있다.",
+          "출력의 shape와 의미를 말할 수 있다.",
+          "가장 흔한 오류 하나와 확인 방법을 말할 수 있다."
         ]
       }
     ],
@@ -439,9 +607,11 @@ window.AI_STUDY_CURRICULUM = [
       "steps": [
         "token id 목록을 만든다.",
         "block_size+1개를 잘라 x/y를 만든다.",
-        "첫 batch shape를 출력한다."
+        "첫 batch shape를 출력한다.",
+        "관련 코드 조각에서 shape 주석을 직접 붙인다.",
+        "실패할 수 있는 입력 예시를 하나 만들고 원인을 적는다."
       ],
-      "expectedInsight": "데이터 공급 계약과 모델 입력 shape를 연결한다."
+      "expectedInsight": "데이터 공급 계약과 모델 입력 shape를 연결한다. 수업 후에는 같은 주제를 작은 입력으로 직접 재현할 수 있어야 한다."
     },
     "misconceptions": [
       "Dataset이 항상 모든 데이터를 메모리에 올려야 한다고 오해하기 쉽다."
@@ -479,8 +649,9 @@ window.AI_STUDY_CURRICULUM = [
       "tensor-shape"
     ],
     "learningGoals": [
-      "Tokenization, embedding, position에서 꼭 알아야 할 입력·출력과 계산 흐름을 설명한다.",
-      "코드 조각을 보고 shape 변화와 흔한 오류를 짚는다."
+      "Tokenization, embedding, position의 입력, 출력, 비용 기준을 초보자 언어로 설명한다.",
+      "Tokenization, embedding, position의 핵심 shape를 코드 출력과 연결한다.",
+      "작은 PyTorch 또는 의사코드 예제로 같은 원리를 재현한다."
     ],
     "mentalModel": {
       "conceptNote": "텍스트는 token id가 되고, embedding table lookup으로 [B,T,C] 표현이 된다.",
@@ -494,22 +665,46 @@ window.AI_STUDY_CURRICULUM = [
         "code": "tok = nn.Embedding(vocab, C)(input_ids) pos = nn.Embedding(block, C)(positions) x = tok + pos"
       },
       {
-        "heading": "기초 복습",
-        "body": "이전 내용을 자세히 기억하지 못해도 이 항목부터 다시 잡으면 된다.",
+        "heading": "처음 보는 사람을 위한 용어 정리",
+        "body": "문자열은 모델이 바로 읽을 수 없으므로 tokenizer가 정수 id로 바꾸고, embedding table이 각 id를 벡터로 조회한다.",
         "bullets": [
-          "Tokenizer는 text를 token id sequence로 바꾼다.",
-          "Embedding은 token id를 vector로 조회한다.",
-          "Position 정보가 없으면 모델은 token 순서를 알기 어렵다.",
-          "input_ids [B,T]는 embedding 뒤 [B,T,C]가 된다.",
-          "vocab 크기는 embedding table 행 수와 logits 마지막 차원에 연결된다."
+          "text → tokens → ids [B,T] → token embedding [B,T,C] → position 정보 더하기",
+          "입력 ids는 정수 [B,T], embedding 결과는 실수 [B,T,C]다. V는 어휘 크기, C는 hidden 크기다.",
+          "모르는 기호가 나오면 이 장의 shape 문장을 먼저 다시 읽는다."
         ]
       },
       {
-        "heading": "Position 정보",
-        "body": "self-attention 자체는 순서를 모르므로 위치 정보를 더해야 같은 단어라도 자리 차이를 표현한다.",
+        "heading": "수업 판서처럼 따라가는 계산 흐름",
+        "body": "아래 순서대로 손으로 화살표를 그리면 코드가 어떤 tensor를 만들고 넘기는지 빠르게 보인다.",
         "bullets": [
-          "absolute position",
-          "rotary/relative position은 이후 확장 주제"
+          "text",
+          "tokens",
+          "ids [B,T]",
+          "token embedding [B,T,C]",
+          "position 정보 더하기"
+        ]
+      },
+      {
+        "heading": "작은 코드로 확인하기",
+        "body": "큰 기능을 바로 쓰기보다, 같은 원리를 작은 tensor와 짧은 코드로 먼저 확인한다. 실행 결과의 값보다 shape와 dtype을 먼저 출력한다.",
+        "code": "ids = torch.tensor([[101, 2054, 2003, 102]])\ntok = torch.nn.Embedding(num_embeddings=30000, embedding_dim=768)\npos = torch.nn.Embedding(num_embeddings=512, embedding_dim=768)\nx = tok(ids) + pos(torch.arange(ids.size(1)))"
+      },
+      {
+        "heading": "초보자가 자주 놓치는 지점",
+        "body": "구현이 돌아가도 학습이 안 되거나 답이 이상할 때는 아래 항목부터 점검한다.",
+        "bullets": [
+          "token 하나가 항상 단어 하나라고 생각하면 안 된다.",
+          "padding token까지 loss에 넣으면 학습 신호가 흐려진다.",
+          "position 정보가 없으면 순서 구분이 약해진다."
+        ]
+      },
+      {
+        "heading": "다음 장으로 넘어가기 전 확인",
+        "body": "한 장을 끝낼 때는 정의를 외웠는지가 아니라, 입력과 출력, 비용, 실패 원인을 말할 수 있는지 확인한다.",
+        "bullets": [
+          "입력 tensor 또는 자료 구조를 말할 수 있다.",
+          "출력의 shape와 의미를 말할 수 있다.",
+          "가장 흔한 오류 하나와 확인 방법을 말할 수 있다."
         ]
       }
     ],
@@ -517,9 +712,11 @@ window.AI_STUDY_CURRICULUM = [
       "title": "Embedding shape 출력",
       "steps": [
         "input_ids shape [2,8]을 만든다.",
-        "Embedding 뒤 [2,8,C]를 확인한다."
+        "Embedding 뒤 [2,8,C]를 확인한다.",
+        "관련 코드 조각에서 shape 주석을 직접 붙인다.",
+        "실패할 수 있는 입력 예시를 하나 만들고 원인을 적는다."
       ],
-      "expectedInsight": "텍스트가 모델 내부 숫자로 변환되는 첫 단계를 이해한다."
+      "expectedInsight": "텍스트가 모델 내부 숫자로 변환되는 첫 단계를 이해한다. 수업 후에는 같은 주제를 작은 입력으로 직접 재현할 수 있어야 한다."
     },
     "misconceptions": [
       "token 하나가 항상 단어 하나라고 오해하기 쉽다."
@@ -557,8 +754,9 @@ window.AI_STUDY_CURRICULUM = [
       "token-embedding"
     ],
     "learningGoals": [
-      "Scaled dot-product attention과 causal mask에서 꼭 알아야 할 입력·출력과 계산 흐름을 설명한다.",
-      "코드 조각을 보고 shape 변화와 흔한 오류를 짚는다."
+      "Scaled dot-product attention과 causal mask의 입력, 출력, 비용 기준을 초보자 언어로 설명한다.",
+      "Scaled dot-product attention과 causal mask의 핵심 shape를 코드 출력과 연결한다.",
+      "작은 PyTorch 또는 의사코드 예제로 같은 원리를 재현한다."
     ],
     "mentalModel": {
       "conceptNote": "Attention은 token 간 score 행렬을 만들고, causal mask로 미래 정답 누수를 막는다.",
@@ -573,22 +771,47 @@ window.AI_STUDY_CURRICULUM = [
         "widget": "attention"
       },
       {
-        "heading": "기초 복습",
-        "body": "이전 내용을 자세히 기억하지 못해도 이 항목부터 다시 잡으면 된다.",
+        "heading": "처음 보는 사람을 위한 용어 정리",
+        "body": "Attention은 각 token이 다른 token을 얼마나 참고할지 점수화한다. Causal mask는 미래 token을 보지 못하게 막는다.",
         "bullets": [
-          "Q는 무엇을 찾는지, K는 비교될 주소, V는 섞일 내용이다.",
-          "QKᵀ 결과는 token이 token을 얼마나 볼지 나타내는 [T,T] 표다.",
-          "causal mask는 미래 정답을 미리 보지 못하게 막는다.",
-          "softmax 전에 mask를 넣어야 미래 token 확률이 사라진다.",
-          "T가 두 배가 되면 attention score 비용은 대략 네 배로 늘어난다."
+          "Q,K,V 생성 → QKᵀ 점수 → scale → mask 적용 → softmax → V 가중합",
+          "Q,K,V는 [B,H,T,D], score는 [B,H,T,T], 출력은 다시 [B,H,T,D]다.",
+          "모르는 기호가 나오면 이 장의 shape 문장을 먼저 다시 읽는다."
         ]
       },
       {
-        "heading": "비용과 최적화 포인트",
-        "body": "score matrix가 [T,T]라서 sequence length가 늘면 memory와 연산량이 빠르게 커진다.",
+        "heading": "수업 판서처럼 따라가는 계산 흐름",
+        "body": "아래 순서대로 손으로 화살표를 그리면 코드가 어떤 tensor를 만들고 넘기는지 빠르게 보인다.",
         "bullets": [
-          "SDPA는 같은 수식을 더 효율적으로 실행",
-          "mask는 softmax 전에 적용"
+          "Q,K,V 생성",
+          "QKᵀ 점수",
+          "scale",
+          "mask 적용",
+          "softmax",
+          "V 가중합"
+        ]
+      },
+      {
+        "heading": "작은 코드로 확인하기",
+        "body": "큰 기능을 바로 쓰기보다, 같은 원리를 작은 tensor와 짧은 코드로 먼저 확인한다. 실행 결과의 값보다 shape와 dtype을 먼저 출력한다.",
+        "code": "scores = q @ k.transpose(-2, -1) / (q.size(-1) ** 0.5)\nmask = torch.triu(torch.ones(T,T), diagonal=1).bool()\nscores = scores.masked_fill(mask, float(\"-inf\"))\nattn = scores.softmax(dim=-1)\nout = attn @ v"
+      },
+      {
+        "heading": "초보자가 자주 놓치는 지점",
+        "body": "구현이 돌아가도 학습이 안 되거나 답이 이상할 때는 아래 항목부터 점검한다.",
+        "bullets": [
+          "mask를 softmax 뒤에 적용하면 이미 확률이 새어 나간다.",
+          "D로 나누지 않으면 score가 커져 softmax가 과하게 뾰족해질 수 있다.",
+          "PyTorch SDPA는 입력 조건에 따라 더 빠른 구현을 자동 선택할 수 있다."
+        ]
+      },
+      {
+        "heading": "다음 장으로 넘어가기 전 확인",
+        "body": "한 장을 끝낼 때는 정의를 외웠는지가 아니라, 입력과 출력, 비용, 실패 원인을 말할 수 있는지 확인한다.",
+        "bullets": [
+          "입력 tensor 또는 자료 구조를 말할 수 있다.",
+          "출력의 shape와 의미를 말할 수 있다.",
+          "가장 흔한 오류 하나와 확인 방법을 말할 수 있다."
         ]
       }
     ],
@@ -596,9 +819,11 @@ window.AI_STUDY_CURRICULUM = [
       "title": "Mask 전후 비교",
       "steps": [
         "T=4 toy q/k/v를 만든다.",
-        "mask 전후 weights를 출력한다."
+        "mask 전후 weights를 출력한다.",
+        "관련 코드 조각에서 shape 주석을 직접 붙인다.",
+        "실패할 수 있는 입력 예시를 하나 만들고 원인을 적는다."
       ],
-      "expectedInsight": "attention shape와 causal mask 목적을 연결한다."
+      "expectedInsight": "attention shape와 causal mask 목적을 연결한다. 수업 후에는 같은 주제를 작은 입력으로 직접 재현할 수 있어야 한다."
     },
     "misconceptions": [
       "mask를 softmax 뒤에 적용해도 같다고 오해하기 쉽다."
@@ -636,8 +861,9 @@ window.AI_STUDY_CURRICULUM = [
       "attention-mask"
     ],
     "learningGoals": [
-      "Multi-head attention과 Transformer block에서 꼭 알아야 할 입력·출력과 계산 흐름을 설명한다.",
-      "코드 조각을 보고 shape 변화와 흔한 오류를 짚는다."
+      "Multi-head attention과 Transformer block의 입력, 출력, 비용 기준을 초보자 언어로 설명한다.",
+      "Multi-head attention과 Transformer block의 핵심 shape를 코드 출력과 연결한다.",
+      "작은 PyTorch 또는 의사코드 예제로 같은 원리를 재현한다."
     ],
     "mentalModel": {
       "conceptNote": "Block은 token mixing(attention)과 channel mixing(MLP)을 residual로 반복한다.",
@@ -651,22 +877,48 @@ window.AI_STUDY_CURRICULUM = [
         "code": "class Block(nn.Module): def __init__(self): super().__init__() self.attn = SelfAttention() self.mlp = MLP() def forward(self, x): x = x + self.attn(norm(x)) return x + self.mlp(norm(x))"
       },
       {
-        "heading": "기초 복습",
-        "body": "이전 내용을 자세히 기억하지 못해도 이 항목부터 다시 잡으면 된다.",
+        "heading": "처음 보는 사람을 위한 용어 정리",
+        "body": "Multi-head attention은 여러 관점의 attention을 병렬로 계산하고, Transformer block은 attention과 MLP를 residual로 쌓는다.",
         "bullets": [
-          "Attention은 token 사이 정보를 섞는다.",
-          "MLP는 각 token 내부의 channel 정보를 변환한다.",
-          "Residual은 원래 정보를 유지하면서 새 정보를 더한다.",
-          "LayerNorm은 깊은 block에서 scale을 안정화한다.",
-          "Block 입출력 shape는 보통 [B,T,C]로 유지된다."
+          "x → LayerNorm → MHA → residual → LayerNorm → MLP → residual",
+          "block 입출력은 보통 [B,T,C]로 유지된다. 내부에서만 [B,H,T,D]로 잠시 나뉜다.",
+          "모르는 기호가 나오면 이 장의 shape 문장을 먼저 다시 읽는다."
         ]
       },
       {
-        "heading": "Residual과 LayerNorm",
-        "body": "깊은 네트워크에서 정보와 gradient 흐름을 안정화한다.",
+        "heading": "수업 판서처럼 따라가는 계산 흐름",
+        "body": "아래 순서대로 손으로 화살표를 그리면 코드가 어떤 tensor를 만들고 넘기는지 빠르게 보인다.",
         "bullets": [
-          "pre-norm은 현대 decoder에서 자주 쓰인다",
-          "MLP는 token별 channel 변환"
+          "x",
+          "LayerNorm",
+          "MHA",
+          "residual",
+          "LayerNorm",
+          "MLP",
+          "residual"
+        ]
+      },
+      {
+        "heading": "작은 코드로 확인하기",
+        "body": "큰 기능을 바로 쓰기보다, 같은 원리를 작은 tensor와 짧은 코드로 먼저 확인한다. 실행 결과의 값보다 shape와 dtype을 먼저 출력한다.",
+        "code": "h = x + self.attn(self.ln1(x))\ny = h + self.mlp(self.ln2(h))\nreturn y  # shape 유지: [B,T,C]"
+      },
+      {
+        "heading": "초보자가 자주 놓치는 지점",
+        "body": "구현이 돌아가도 학습이 안 되거나 답이 이상할 때는 아래 항목부터 점검한다.",
+        "bullets": [
+          "head 수를 늘리면 항상 좋아지는 것은 아니다. C가 고정이면 head별 D는 작아진다.",
+          "residual이 없으면 깊은 모델 학습이 불안정해진다.",
+          "LayerNorm 위치는 pre-norm/post-norm 설계 차이를 만든다."
+        ]
+      },
+      {
+        "heading": "다음 장으로 넘어가기 전 확인",
+        "body": "한 장을 끝낼 때는 정의를 외웠는지가 아니라, 입력과 출력, 비용, 실패 원인을 말할 수 있는지 확인한다.",
+        "bullets": [
+          "입력 tensor 또는 자료 구조를 말할 수 있다.",
+          "출력의 shape와 의미를 말할 수 있다.",
+          "가장 흔한 오류 하나와 확인 방법을 말할 수 있다."
         ]
       }
     ],
@@ -674,9 +926,11 @@ window.AI_STUDY_CURRICULUM = [
       "title": "Block skeleton 읽기",
       "steps": [
         "각 줄 옆에 shape 주석을 단다.",
-        "attention과 MLP가 섞는 차원을 표시한다."
+        "attention과 MLP가 섞는 차원을 표시한다.",
+        "관련 코드 조각에서 shape 주석을 직접 붙인다.",
+        "실패할 수 있는 입력 예시를 하나 만들고 원인을 적는다."
       ],
-      "expectedInsight": "block 내부를 layer 이름이 아니라 정보 흐름으로 읽는다."
+      "expectedInsight": "block 내부를 layer 이름이 아니라 정보 흐름으로 읽는다. 수업 후에는 같은 주제를 작은 입력으로 직접 재현할 수 있어야 한다."
     },
     "misconceptions": [
       "MLP가 token 사이 정보를 섞는다고 오해하기 쉽다."
@@ -715,8 +969,9 @@ window.AI_STUDY_CURRICULUM = [
       "dataset-loader"
     ],
     "learningGoals": [
-      "Tiny decoder LM 학습 루프에서 꼭 알아야 할 입력·출력과 계산 흐름을 설명한다.",
-      "코드 조각을 보고 shape 변화와 흔한 오류를 짚는다."
+      "Tiny decoder LM 학습 루프의 입력, 출력, 비용 기준을 초보자 언어로 설명한다.",
+      "Tiny decoder LM 학습 루프의 핵심 shape를 코드 출력과 연결한다.",
+      "작은 PyTorch 또는 의사코드 예제로 같은 원리를 재현한다."
     ],
     "mentalModel": {
       "conceptNote": "언어모델 학습은 x와 한 칸 밀린 y를 맞히는 next-token 루프다.",
@@ -730,22 +985,47 @@ window.AI_STUDY_CURRICULUM = [
         "code": "for x, y in loader: logits = model(x) loss = F.cross_entropy(logits.view(-1, V), y.view(-1)) optimizer.zero_grad() loss.backward() optimizer.step()"
       },
       {
-        "heading": "기초 복습",
-        "body": "이전 내용을 자세히 기억하지 못해도 이 항목부터 다시 잡으면 된다.",
+        "heading": "처음 보는 사람을 위한 용어 정리",
+        "body": "Decoder LM은 이전 token들로 다음 token을 맞히도록 학습한다. 작은 모델로 전체 루프를 구현해 보면 큰 모델 구조도 읽기 쉬워진다.",
         "bullets": [
-          "Decoder LM은 지금까지의 token으로 다음 token을 예측한다.",
-          "입력 x는 앞 token, target y는 한 칸 뒤 token이다.",
-          "logits shape는 [B,T,V]이고 V는 vocabulary 크기다.",
-          "loss는 모든 위치의 다음 token 예측을 평균낸다.",
-          "작은 corpus에서도 loss가 내려가는지 먼저 확인한다."
+          "text ids → 입력/정답 한 칸 shift → decoder forward → logits → cross entropy → update",
+          "input_ids [B,T], logits [B,T,V], targets [B,T]. loss 계산 전 [B*T,V]와 [B*T]로 펼친다.",
+          "모르는 기호가 나오면 이 장의 shape 문장을 먼저 다시 읽는다."
         ]
       },
       {
-        "heading": "Loss shape 처리",
-        "body": "cross_entropy는 보통 [N,V]와 [N]을 기대하므로 [B,T,V]를 [B*T,V]로 펴서 넣는다.",
+        "heading": "수업 판서처럼 따라가는 계산 흐름",
+        "body": "아래 순서대로 손으로 화살표를 그리면 코드가 어떤 tensor를 만들고 넘기는지 빠르게 보인다.",
         "bullets": [
-          "tiny 모델은 개념 확인용",
-          "overfit toy data로 루프 검증 가능"
+          "text ids",
+          "입력/정답 한 칸 shift",
+          "decoder forward",
+          "logits",
+          "cross entropy",
+          "update"
+        ]
+      },
+      {
+        "heading": "작은 코드로 확인하기",
+        "body": "큰 기능을 바로 쓰기보다, 같은 원리를 작은 tensor와 짧은 코드로 먼저 확인한다. 실행 결과의 값보다 shape와 dtype을 먼저 출력한다.",
+        "code": "x = batch[:, :-1]\ny = batch[:, 1:]\nlogits = model(x)\nloss = F.cross_entropy(logits.reshape(-1, V), y.reshape(-1))"
+      },
+      {
+        "heading": "초보자가 자주 놓치는 지점",
+        "body": "구현이 돌아가도 학습이 안 되거나 답이 이상할 때는 아래 항목부터 점검한다.",
+        "bullets": [
+          "정답을 shift하지 않으면 현재 token을 그대로 맞히는 문제가 된다.",
+          "train loss만 보면 과적합을 놓친다.",
+          "작은 데이터에서는 validation split을 반드시 남긴다."
+        ]
+      },
+      {
+        "heading": "다음 장으로 넘어가기 전 확인",
+        "body": "한 장을 끝낼 때는 정의를 외웠는지가 아니라, 입력과 출력, 비용, 실패 원인을 말할 수 있는지 확인한다.",
+        "bullets": [
+          "입력 tensor 또는 자료 구조를 말할 수 있다.",
+          "출력의 shape와 의미를 말할 수 있다.",
+          "가장 흔한 오류 하나와 확인 방법을 말할 수 있다."
         ]
       }
     ],
@@ -753,9 +1033,11 @@ window.AI_STUDY_CURRICULUM = [
       "title": "Toy overfit",
       "steps": [
         "작은 vocab과 짧은 문장을 만든다.",
-        "loss가 내려가는지만 확인한다."
+        "loss가 내려가는지만 확인한다.",
+        "관련 코드 조각에서 shape 주석을 직접 붙인다.",
+        "실패할 수 있는 입력 예시를 하나 만들고 원인을 적는다."
       ],
-      "expectedInsight": "언어모델 학습의 최소 닫힌 루프를 본다."
+      "expectedInsight": "언어모델 학습의 최소 닫힌 루프를 본다. 수업 후에는 같은 주제를 작은 입력으로 직접 재현할 수 있어야 한다."
     },
     "misconceptions": [
       "좋은 문장 생성이 되지 않으면 학습 루프가 틀렸다고 오해하기 쉽다."
@@ -794,8 +1076,9 @@ window.AI_STUDY_CURRICULUM = [
       "tiny-decoder-lm"
     ],
     "learningGoals": [
-      "Generation, sampling, KV cache에서 꼭 알아야 할 입력·출력과 계산 흐름을 설명한다.",
-      "코드 조각을 보고 shape 변화와 흔한 오류를 짚는다."
+      "Generation, sampling, KV cache의 입력, 출력, 비용 기준을 초보자 언어로 설명한다.",
+      "Generation, sampling, KV cache의 핵심 shape를 코드 출력과 연결한다.",
+      "작은 PyTorch 또는 의사코드 예제로 같은 원리를 재현한다."
     ],
     "mentalModel": {
       "conceptNote": "생성은 prefill과 decode로 나뉘며, KV cache는 과거 K/V 재계산을 줄인다.",
@@ -810,23 +1093,47 @@ window.AI_STUDY_CURRICULUM = [
         "widget": "kv-cache"
       },
       {
-        "heading": "기초 복습",
-        "body": "이전 내용을 자세히 기억하지 못해도 이 항목부터 다시 잡으면 된다.",
+        "heading": "처음 보는 사람을 위한 용어 정리",
+        "body": "생성은 한 token씩 반복한다. KV cache는 이전 token의 key/value를 저장해 매 단계 전체 문장을 다시 계산하는 비용을 줄인다.",
         "bullets": [
-          "Prefill은 prompt 전체를 한 번에 처리한다.",
-          "Decode는 새 token을 하나씩 순차적으로 만든다.",
-          "KV cache는 이전 token의 K/V를 저장해 반복 계산을 줄인다.",
-          "cache는 속도를 얻는 대신 memory를 더 쓴다.",
-          "temperature, top-k, top-p는 다양성과 안정성의 균형을 바꾼다."
+          "prefill → 첫 logits → sampling → 새 token → cache에 K/V 추가 → 다음 logits 반복",
+          "cache는 layer마다 K,V를 보관한다. 길이가 늘수록 [B,H,T,D]에서 T가 커지며 메모리도 증가한다.",
+          "모르는 기호가 나오면 이 장의 shape 문장을 먼저 다시 읽는다."
         ]
       },
       {
-        "heading": "Sampling 설정",
-        "body": "temperature, top-k, top-p는 다양성과 안정성의 균형를 조절한다.",
+        "heading": "수업 판서처럼 따라가는 계산 흐름",
+        "body": "아래 순서대로 손으로 화살표를 그리면 코드가 어떤 tensor를 만들고 넘기는지 빠르게 보인다.",
         "bullets": [
-          "prefill은 병렬성이 높다",
-          "decode는 순차성이 강하다",
-          "cache는 속도 대신 메모리를 쓴다"
+          "prefill",
+          "첫 logits",
+          "sampling",
+          "새 token",
+          "cache에 K/V 추가",
+          "다음 logits 반복"
+        ]
+      },
+      {
+        "heading": "작은 코드로 확인하기",
+        "body": "큰 기능을 바로 쓰기보다, 같은 원리를 작은 tensor와 짧은 코드로 먼저 확인한다. 실행 결과의 값보다 shape와 dtype을 먼저 출력한다.",
+        "code": "with torch.no_grad():\n    out = model(input_ids, use_cache=True)\n    past = out.past_key_values\n    next_id = sample(out.logits[:, -1])\n    out = model(next_id[:, None], past_key_values=past, use_cache=True)"
+      },
+      {
+        "heading": "초보자가 자주 놓치는 지점",
+        "body": "구현이 돌아가도 학습이 안 되거나 답이 이상할 때는 아래 항목부터 점검한다.",
+        "bullets": [
+          "cache는 속도를 올리지만 메모리를 공짜로 만들지는 않는다.",
+          "temperature/top_p는 학습이 아니라 디코딩 선택 방식이다.",
+          "긴 입력의 prefill 비용과 생성 반복 비용을 구분한다."
+        ]
+      },
+      {
+        "heading": "다음 장으로 넘어가기 전 확인",
+        "body": "한 장을 끝낼 때는 정의를 외웠는지가 아니라, 입력과 출력, 비용, 실패 원인을 말할 수 있는지 확인한다.",
+        "bullets": [
+          "입력 tensor 또는 자료 구조를 말할 수 있다.",
+          "출력의 shape와 의미를 말할 수 있다.",
+          "가장 흔한 오류 하나와 확인 방법을 말할 수 있다."
         ]
       }
     ],
@@ -834,9 +1141,11 @@ window.AI_STUDY_CURRICULUM = [
       "title": "Cache 메모리 계산",
       "steps": [
         "layer/head/head_dim/context/dtype을 정한다.",
-        "K와 V 두 벌의 bytes를 근사 계산한다."
+        "K와 V 두 벌의 bytes를 근사 계산한다.",
+        "관련 코드 조각에서 shape 주석을 직접 붙인다.",
+        "실패할 수 있는 입력 예시를 하나 만들고 원인을 적는다."
       ],
-      "expectedInsight": "inference 최적화가 모델 구조뿐 아니라 시스템 비용 문제임을 안다."
+      "expectedInsight": "inference 최적화가 모델 구조뿐 아니라 시스템 비용 문제임을 안다. 수업 후에는 같은 주제를 작은 입력으로 직접 재현할 수 있어야 한다."
     },
     "misconceptions": [
       "KV cache를 학습에도 항상 켜야 한다고 오해하기 쉽다."
@@ -875,8 +1184,9 @@ window.AI_STUDY_CURRICULUM = [
       "module-state"
     ],
     "learningGoals": [
-      "Fine-tuning, LoRA, QLoRA, adapter merge에서 꼭 알아야 할 입력·출력과 계산 흐름을 설명한다.",
-      "코드 조각을 보고 shape 변화와 흔한 오류를 짚는다."
+      "Fine-tuning, LoRA, QLoRA, adapter merge의 입력, 출력, 비용 기준을 초보자 언어로 설명한다.",
+      "Fine-tuning, LoRA, QLoRA, adapter merge의 핵심 shape를 코드 출력과 연결한다.",
+      "작은 PyTorch 또는 의사코드 예제로 같은 원리를 재현한다."
     ],
     "mentalModel": {
       "conceptNote": "LoRA는 base weight를 고정하고 low-rank adapter만 학습해 파라미터 예산을 줄인다.",
@@ -890,23 +1200,46 @@ window.AI_STUDY_CURRICULUM = [
         "code": "# pseudo PyTorch: base weight는 고정하고 A/B adapter만 학습\nbase.weight.requires_grad_(False)\ny = x @ W.T + scale * (x @ A.T @ B.T)"
       },
       {
-        "heading": "기초 복습",
-        "body": "이전 내용을 자세히 기억하지 못해도 이 항목부터 다시 잡으면 된다.",
+        "heading": "처음 보는 사람을 위한 용어 정리",
+        "body": "LoRA는 큰 weight를 고정하고 작은 저랭크 adapter만 학습한다. QLoRA는 양자화된 base 위에서 adapter를 학습해 메모리를 줄인다.",
         "bullets": [
-          "Full fine-tuning은 base weight 전체를 학습한다.",
-          "LoRA는 base weight를 고정하고 작은 adapter만 학습한다.",
-          "rank r이 작으면 학습 파라미터와 optimizer memory가 줄어든다.",
-          "target module을 잘못 고르면 효과가 작다.",
-          "QLoRA는 base model을 저정밀로 보관해 memory 부담을 줄인다."
+          "base weight 고정 → adapter A/B 삽입 → task 데이터로 adapter 학습 → 평가 → 필요 시 merge",
+          "원래 W가 [out,in]이면 LoRA는 A [r,in], B [out,r]로 작은 ΔW를 만든다.",
+          "모르는 기호가 나오면 이 장의 shape 문장을 먼저 다시 읽는다."
         ]
       },
       {
-        "heading": "QLoRA와 adapter 운용",
-        "body": "base model을 저정밀로 들고 adapter를 학습해 메모리를 더 줄이는 접근이다.",
+        "heading": "수업 판서처럼 따라가는 계산 흐름",
+        "body": "아래 순서대로 손으로 화살표를 그리면 코드가 어떤 tensor를 만들고 넘기는지 빠르게 보인다.",
         "bullets": [
-          "target module 선택 중요",
-          "merge는 배포 단순화에 유리",
-          "rank가 너무 작으면 표현력이 부족"
+          "base weight 고정",
+          "adapter A/B 삽입",
+          "task 데이터로 adapter 학습",
+          "평가",
+          "필요 시 merge"
+        ]
+      },
+      {
+        "heading": "작은 코드로 확인하기",
+        "body": "큰 기능을 바로 쓰기보다, 같은 원리를 작은 tensor와 짧은 코드로 먼저 확인한다. 실행 결과의 값보다 shape와 dtype을 먼저 출력한다.",
+        "code": "base.weight.requires_grad_(False)\n# y = x @ W.T + scale * (x @ A.T @ B.T)\ntrainable = sum(p.numel() for p in model.parameters() if p.requires_grad)"
+      },
+      {
+        "heading": "초보자가 자주 놓치는 지점",
+        "body": "구현이 돌아가도 학습이 안 되거나 답이 이상할 때는 아래 항목부터 점검한다.",
+        "bullets": [
+          "LoRA는 새 지식을 무조건 완벽히 넣는 마법이 아니다. 데이터 품질과 평가가 더 중요하다.",
+          "merge 후에는 adapter를 따로 끄고 켜기 어려울 수 있다.",
+          "rank r을 키우면 표현력과 메모리가 함께 증가한다."
+        ]
+      },
+      {
+        "heading": "다음 장으로 넘어가기 전 확인",
+        "body": "한 장을 끝낼 때는 정의를 외웠는지가 아니라, 입력과 출력, 비용, 실패 원인을 말할 수 있는지 확인한다.",
+        "bullets": [
+          "입력 tensor 또는 자료 구조를 말할 수 있다.",
+          "출력의 shape와 의미를 말할 수 있다.",
+          "가장 흔한 오류 하나와 확인 방법을 말할 수 있다."
         ]
       }
     ],
@@ -914,9 +1247,11 @@ window.AI_STUDY_CURRICULUM = [
       "title": "학습 파라미터 세기",
       "steps": [
         "Linear weight와 LoRA A/B 파라미터 수를 계산한다.",
-        "rank 변화에 따른 비용을 비교한다."
+        "rank 변화에 따른 비용을 비교한다.",
+        "관련 코드 조각에서 shape 주석을 직접 붙인다.",
+        "실패할 수 있는 입력 예시를 하나 만들고 원인을 적는다."
       ],
-      "expectedInsight": "PEFT가 autograd freeze와 parameter budget 문제임을 이해한다."
+      "expectedInsight": "PEFT가 autograd freeze와 parameter budget 문제임을 이해한다. 수업 후에는 같은 주제를 작은 입력으로 직접 재현할 수 있어야 한다."
     },
     "misconceptions": [
       "LoRA가 원본 weight를 직접 전부 수정한다고 오해하기 쉽다."
@@ -955,8 +1290,9 @@ window.AI_STUDY_CURRICULUM = [
       "app-bridge"
     ],
     "learningGoals": [
-      "Data quality, RAG evaluation, regression set에서 꼭 알아야 할 입력·출력과 계산 흐름을 설명한다.",
-      "코드 조각을 보고 shape 변화와 흔한 오류를 짚는다."
+      "Data quality, RAG evaluation, regression set의 입력, 출력, 비용 기준을 초보자 언어로 설명한다.",
+      "Data quality, RAG evaluation, regression set의 핵심 shape를 코드 출력과 연결한다.",
+      "작은 PyTorch 또는 의사코드 예제로 같은 원리를 재현한다."
     ],
     "mentalModel": {
       "conceptNote": "평가셋은 개선 방향을 고정하는 기준선이다. 사례, 기대 동작, 실패 유형을 함께 둔다.",
@@ -970,22 +1306,46 @@ window.AI_STUDY_CURRICULUM = [
         "code": "case = {'question': q, 'expected': answer} actual = rag(case['question']) score = judge(expected=case['expected'], actual=actual)"
       },
       {
-        "heading": "기초 복습",
-        "body": "이전 내용을 자세히 기억하지 못해도 이 항목부터 다시 잡으면 된다.",
+        "heading": "처음 보는 사람을 위한 용어 정리",
+        "body": "모델 개선은 데이터와 평가 없이는 판단하기 어렵다. 고정된 regression set으로 바뀐 모델이 무엇을 잘하고 못하는지 기록한다.",
         "bullets": [
-          "평가셋이 없으면 변경이 좋아졌는지 나빠졌는지 알 수 없다.",
-          "RAG 평가는 검색 품질과 답변 품질을 나누어 본다.",
-          "모델 튜닝 평가는 train/valid leakage를 특히 조심한다.",
-          "한 번 고친 실패 사례는 regression set에 넣는다.",
-          "점수 하나보다 실패 유형 기록이 다음 개선에 더 유용할 때가 많다."
+          "데이터 수집 → 라벨/기준 정리 → train/val/test 분리 → metric 계산 → error slice 분석",
+          "평가 입력은 사례 목록, 출력은 점수표와 실패 유형 표다. 생성형 평가는 정답 문자열뿐 아니라 기준 문장도 필요하다.",
+          "모르는 기호가 나오면 이 장의 shape 문장을 먼저 다시 읽는다."
         ]
       },
       {
-        "heading": "회귀 평가셋",
-        "body": "한 번 고친 실패 사례는 작은 고정 테스트셋에 넣어 다음 변경에서 다시 깨지는지 본다.",
+        "heading": "수업 판서처럼 따라가는 계산 흐름",
+        "body": "아래 순서대로 손으로 화살표를 그리면 코드가 어떤 tensor를 만들고 넘기는지 빠르게 보인다.",
         "bullets": [
-          "정답 하나보다 평가 기준이 필요할 때가 많다",
-          "데이터 출처와 라이선스를 기록한다"
+          "데이터 수집",
+          "라벨/기준 정리",
+          "train/val/test 분리",
+          "metric 계산",
+          "error slice 분석"
+        ]
+      },
+      {
+        "heading": "작은 코드로 확인하기",
+        "body": "큰 기능을 바로 쓰기보다, 같은 원리를 작은 tensor와 짧은 코드로 먼저 확인한다. 실행 결과의 값보다 shape와 dtype을 먼저 출력한다.",
+        "code": "for ex in eval_set:\n    pred = run_model(ex[\"input\"])\n    score = metric(pred, ex[\"expected\"])\n    rows.append({\"id\": ex[\"id\"], \"score\": score, \"tag\": ex[\"tag\"]})"
+      },
+      {
+        "heading": "초보자가 자주 놓치는 지점",
+        "body": "구현이 돌아가도 학습이 안 되거나 답이 이상할 때는 아래 항목부터 점검한다.",
+        "bullets": [
+          "몇 개 예시만 보고 성능이 올랐다고 판단하면 위험하다.",
+          "학습 데이터와 평가 데이터를 섞으면 회귀를 볼 수 없다.",
+          "평균 점수만 보면 특정 유형의 실패가 가려진다."
+        ]
+      },
+      {
+        "heading": "다음 장으로 넘어가기 전 확인",
+        "body": "한 장을 끝낼 때는 정의를 외웠는지가 아니라, 입력과 출력, 비용, 실패 원인을 말할 수 있는지 확인한다.",
+        "bullets": [
+          "입력 tensor 또는 자료 구조를 말할 수 있다.",
+          "출력의 shape와 의미를 말할 수 있다.",
+          "가장 흔한 오류 하나와 확인 방법을 말할 수 있다."
         ]
       }
     ],
@@ -993,9 +1353,11 @@ window.AI_STUDY_CURRICULUM = [
       "title": "10개 회귀셋 만들기",
       "steps": [
         "자주 실패한 질문 10개를 고른다.",
-        "기대 답변과 실패 유형을 적는다."
+        "기대 답변과 실패 유형을 적는다.",
+        "관련 코드 조각에서 shape 주석을 직접 붙인다.",
+        "실패할 수 있는 입력 예시를 하나 만들고 원인을 적는다."
       ],
-      "expectedInsight": "모델 개선의 단위를 재현 가능한 사례로 만든다."
+      "expectedInsight": "모델 개선의 단위를 재현 가능한 사례로 만든다. 수업 후에는 같은 주제를 작은 입력으로 직접 재현할 수 있어야 한다."
     },
     "misconceptions": [
       "평균 점수 하나만 높으면 제품 품질도 항상 좋아진다고 오해하기 쉽다."
@@ -1033,8 +1395,9 @@ window.AI_STUDY_CURRICULUM = [
       "data-evaluation"
     ],
     "learningGoals": [
-      "Structured output과 tool agent 재점검에서 꼭 알아야 할 입력·출력과 계산 흐름을 설명한다.",
-      "코드 조각을 보고 shape 변화와 흔한 오류를 짚는다."
+      "Structured output과 tool agent 재점검의 입력, 출력, 비용 기준을 초보자 언어로 설명한다.",
+      "Structured output과 tool agent 재점검의 핵심 shape를 코드 출력과 연결한다.",
+      "작은 PyTorch 또는 의사코드 예제로 같은 원리를 재현한다."
     ],
     "mentalModel": {
       "conceptNote": "구조화 출력과 tool 호출은 모델 출력을 제품 코드가 다루는 계약으로 바꾼다.",
@@ -1048,23 +1411,47 @@ window.AI_STUDY_CURRICULUM = [
         "code": "schema = {'answer': 'string', 'citations': ['url'], 'confidence': 'number'} validate(model_output, schema)"
       },
       {
-        "heading": "기초 복습",
-        "body": "이전 내용을 자세히 기억하지 못해도 이 항목부터 다시 잡으면 된다.",
+        "heading": "처음 보는 사람을 위한 용어 정리",
+        "body": "구조화 출력은 모델 답을 정해진 schema에 맞추는 장치다. tool agent는 외부 작업을 실행하므로 실패 기록과 재시도 기준이 필요하다.",
         "bullets": [
-          "JSON schema는 출력 형식을 안정화하지만 정답성을 보장하지 않는다.",
-          "Tool 호출은 tool 선택, 인자 구성, 결과 사용으로 나누어 평가한다.",
-          "Fallback은 실패를 숨기는 장치가 아니라 실패를 관리하는 장치다.",
-          "모델 내부 성능 문제와 앱 계약 문제를 분리해야 한다.",
-          "Trace를 남겨야 어느 단계가 깨졌는지 다시 볼 수 있다."
+          "요청 → schema 선택 → 모델 출력 → 파싱/검증 → 도구 실행 → 결과 기록",
+          "모델 내부는 여전히 token logits를 만든다. 바깥에서는 JSON 객체나 tool call 기록으로 검증한다.",
+          "모르는 기호가 나오면 이 장의 shape 문장을 먼저 다시 읽는다."
         ]
       },
       {
-        "heading": "평가 연결",
-        "body": "Agent 성공률은 tool 선택, 입력 인자, 최종 답변을 나누어 평가하면 개선 지점이 보인다.",
+        "heading": "수업 판서처럼 따라가는 계산 흐름",
+        "body": "아래 순서대로 손으로 화살표를 그리면 코드가 어떤 tensor를 만들고 넘기는지 빠르게 보인다.",
         "bullets": [
-          "retry/fallback 정책",
-          "schema validation",
-          "tool result grounding"
+          "요청",
+          "schema 선택",
+          "모델 출력",
+          "파싱/검증",
+          "도구 실행",
+          "결과 기록"
+        ]
+      },
+      {
+        "heading": "작은 코드로 확인하기",
+        "body": "큰 기능을 바로 쓰기보다, 같은 원리를 작은 tensor와 짧은 코드로 먼저 확인한다. 실행 결과의 값보다 shape와 dtype을 먼저 출력한다.",
+        "code": "schema = {\"answer\": str, \"citations\": list}\nobj = parse_and_validate(raw_text, schema)\nif not obj[\"citations\"]:\n    mark_failure(\"missing evidence\")"
+      },
+      {
+        "heading": "초보자가 자주 놓치는 지점",
+        "body": "구현이 돌아가도 학습이 안 되거나 답이 이상할 때는 아래 항목부터 점검한다.",
+        "bullets": [
+          "JSON 형식이 맞아도 내용이 맞는 것은 아니다.",
+          "도구 실패를 모델 실패와 분리해서 기록해야 한다.",
+          "재시도 횟수와 중단 조건을 정하지 않으면 비용이 커진다."
+        ]
+      },
+      {
+        "heading": "다음 장으로 넘어가기 전 확인",
+        "body": "한 장을 끝낼 때는 정의를 외웠는지가 아니라, 입력과 출력, 비용, 실패 원인을 말할 수 있는지 확인한다.",
+        "bullets": [
+          "입력 tensor 또는 자료 구조를 말할 수 있다.",
+          "출력의 shape와 의미를 말할 수 있다.",
+          "가장 흔한 오류 하나와 확인 방법을 말할 수 있다."
         ]
       }
     ],
@@ -1072,9 +1459,11 @@ window.AI_STUDY_CURRICULUM = [
       "title": "Agent trace 평가 기준",
       "steps": [
         "tool 선택 성공/실패를 표시한다.",
-        "인자 오류와 답변 오류를 분리한다."
+        "인자 오류와 답변 오류를 분리한다.",
+        "관련 코드 조각에서 shape 주석을 직접 붙인다.",
+        "실패할 수 있는 입력 예시를 하나 만들고 원인을 적는다."
       ],
-      "expectedInsight": "앱 계약과 모델 학습 문제를 분리한다."
+      "expectedInsight": "앱 계약과 모델 학습 문제를 분리한다. 수업 후에는 같은 주제를 작은 입력으로 직접 재현할 수 있어야 한다."
     },
     "misconceptions": [
       "JSON schema가 사실성을 보장한다고 오해하기 쉽다."
@@ -1113,8 +1502,9 @@ window.AI_STUDY_CURRICULUM = [
       "attention-mask"
     ],
     "learningGoals": [
-      "CNN-to-ViT 전환과 patch embedding에서 꼭 알아야 할 입력·출력과 계산 흐름을 설명한다.",
-      "코드 조각을 보고 shape 변화와 흔한 오류를 짚는다."
+      "CNN-to-ViT 전환과 patch embedding의 입력, 출력, 비용 기준을 초보자 언어로 설명한다.",
+      "CNN-to-ViT 전환과 patch embedding의 핵심 shape를 코드 출력과 연결한다.",
+      "작은 PyTorch 또는 의사코드 예제로 같은 원리를 재현한다."
     ],
     "mentalModel": {
       "conceptNote": "ViT는 이미지를 patch token sequence로 바꾸고 Transformer 흐름을 적용한다.",
@@ -1129,23 +1519,47 @@ window.AI_STUDY_CURRICULUM = [
         "widget": "vit-patches"
       },
       {
-        "heading": "기초 복습",
-        "body": "이전 내용을 자세히 기억하지 못해도 이 항목부터 다시 잡으면 된다.",
+        "heading": "처음 보는 사람을 위한 용어 정리",
+        "body": "ViT는 이미지를 patch로 잘라 각 patch를 token처럼 다룬다. CNN의 지역 필터 대신 Transformer가 patch 사이 관계를 학습한다.",
         "bullets": [
-          "이미지는 [B,C,H,W] tensor로 들어온다.",
-          "ViT는 이미지를 작은 patch로 자르고 각 patch를 token처럼 다룬다.",
-          "Patch size가 작아지면 token 수가 늘고 attention 비용도 증가한다.",
-          "Position embedding이 있어야 patch 위치 정보를 가진다.",
-          "CNN은 locality bias가 강하고 ViT는 데이터 규모와 attention에 더 의존한다."
+          "image [B,C,H,W] → patch 분할 → patch embedding → position 추가 → Transformer → class head",
+          "224×224 이미지를 16×16 patch로 자르면 14×14=196개 patch token이 생긴다.",
+          "모르는 기호가 나오면 이 장의 shape 문장을 먼저 다시 읽는다."
         ]
       },
       {
-        "heading": "Patch embedding",
-        "body": "각 patch를 flatten 후 linear projection하면 텍스트 token embedding과 비슷한 [B,N,D] 표현이 된다.",
+        "heading": "수업 판서처럼 따라가는 계산 흐름",
+        "body": "아래 순서대로 손으로 화살표를 그리면 코드가 어떤 tensor를 만들고 넘기는지 빠르게 보인다.",
         "bullets": [
-          "class token",
-          "position embedding",
-          "data scale 중요"
+          "image [B,C,H,W]",
+          "patch 분할",
+          "patch embedding",
+          "position 추가",
+          "Transformer",
+          "class head"
+        ]
+      },
+      {
+        "heading": "작은 코드로 확인하기",
+        "body": "큰 기능을 바로 쓰기보다, 같은 원리를 작은 tensor와 짧은 코드로 먼저 확인한다. 실행 결과의 값보다 shape와 dtype을 먼저 출력한다.",
+        "code": "patches = image.unfold(2, 16, 16).unfold(3, 16, 16)\n# [B,C,14,14,16,16] -> [B,196,C*16*16]\ntokens = patch_proj(patches.flatten(2).transpose(1,2))"
+      },
+      {
+        "heading": "초보자가 자주 놓치는 지점",
+        "body": "구현이 돌아가도 학습이 안 되거나 답이 이상할 때는 아래 항목부터 점검한다.",
+        "bullets": [
+          "patch가 작을수록 token 수가 늘어 attention 비용이 커진다.",
+          "이미지 크기가 바뀌면 position 처리도 함께 확인해야 한다.",
+          "ViT도 충분한 데이터/증강 없이는 약할 수 있다."
+        ]
+      },
+      {
+        "heading": "다음 장으로 넘어가기 전 확인",
+        "body": "한 장을 끝낼 때는 정의를 외웠는지가 아니라, 입력과 출력, 비용, 실패 원인을 말할 수 있는지 확인한다.",
+        "bullets": [
+          "입력 tensor 또는 자료 구조를 말할 수 있다.",
+          "출력의 shape와 의미를 말할 수 있다.",
+          "가장 흔한 오류 하나와 확인 방법을 말할 수 있다."
         ]
       }
     ],
@@ -1153,9 +1567,11 @@ window.AI_STUDY_CURRICULUM = [
       "title": "Patch 수 계산",
       "steps": [
         "224/16을 계산한다.",
-        "patch token 개수와 attention score 크기를 구한다."
+        "patch token 개수와 attention score 크기를 구한다.",
+        "관련 코드 조각에서 shape 주석을 직접 붙인다.",
+        "실패할 수 있는 입력 예시를 하나 만들고 원인을 적는다."
       ],
-      "expectedInsight": "이미지도 token sequence로 볼 수 있다."
+      "expectedInsight": "이미지도 token sequence로 볼 수 있다. 수업 후에는 같은 주제를 작은 입력으로 직접 재현할 수 있어야 한다."
     },
     "misconceptions": [
       "ViT가 항상 작은 데이터에서도 CNN보다 낫다고 오해하기 쉽다."
@@ -1193,8 +1609,9 @@ window.AI_STUDY_CURRICULUM = [
       "vision-transformer"
     ],
     "learningGoals": [
-      "CLIP/VLM 직관과 멀티모달 연결에서 꼭 알아야 할 입력·출력과 계산 흐름을 설명한다.",
-      "코드 조각을 보고 shape 변화와 흔한 오류를 짚는다."
+      "CLIP/VLM 직관과 멀티모달 연결의 입력, 출력, 비용 기준을 초보자 언어로 설명한다.",
+      "CLIP/VLM 직관과 멀티모달 연결의 핵심 shape를 코드 출력과 연결한다.",
+      "작은 PyTorch 또는 의사코드 예제로 같은 원리를 재현한다."
     ],
     "mentalModel": {
       "conceptNote": "이미지와 텍스트 표현을 같은 공간에 맞추면 검색, 분류, grounding을 연결할 수 있다.",
@@ -1208,23 +1625,46 @@ window.AI_STUDY_CURRICULUM = [
         "code": "sim = image_emb @ text_emb.T loss = contrastive_loss(sim, labels=torch.arange(B))"
       },
       {
-        "heading": "기초 복습",
-        "body": "이전 내용을 자세히 기억하지 못해도 이 항목부터 다시 잡으면 된다.",
+        "heading": "처음 보는 사람을 위한 용어 정리",
+        "body": "VLM은 이미지 encoder와 언어 모델을 연결해 이미지 정보를 token 표현과 맞춘다. 핵심은 두 modality의 표현 공간을 어떻게 정렬하느냐다.",
         "bullets": [
-          "CLIP류 모델은 이미지와 텍스트를 같은 embedding 공간에 맞춘다.",
-          "정답 이미지-문장 pair는 가깝게, 다른 pair는 멀게 학습한다.",
-          "Similarity matrix의 diagonal이 positive pair가 된다.",
-          "VLM은 vision encoder 출력을 language model 입력 공간에 연결한다.",
-          "Grounding 평가는 단순 caption 품질과 다르게 봐야 한다."
+          "image encoder → visual tokens → projection → language tokens와 결합 → decoder 생성",
+          "이미지 patch 표현 [B,N,Cv]가 projection을 거쳐 언어 hidden [B,N,Clm]과 맞춰진다.",
+          "모르는 기호가 나오면 이 장의 shape 문장을 먼저 다시 읽는다."
         ]
       },
       {
-        "heading": "VLM 연결",
-        "body": "현대 VLM은 vision encoder 출력 token을 language model 입력 공간에 맞춰 넣는 식의 bridge를 둔다.",
+        "heading": "수업 판서처럼 따라가는 계산 흐름",
+        "body": "아래 순서대로 손으로 화살표를 그리면 코드가 어떤 tensor를 만들고 넘기는지 빠르게 보인다.",
         "bullets": [
-          "alignment dataset",
-          "projection layer",
-          "grounding/evaluation"
+          "image encoder",
+          "visual tokens",
+          "projection",
+          "language tokens와 결합",
+          "decoder 생성"
+        ]
+      },
+      {
+        "heading": "작은 코드로 확인하기",
+        "body": "큰 기능을 바로 쓰기보다, 같은 원리를 작은 tensor와 짧은 코드로 먼저 확인한다. 실행 결과의 값보다 shape와 dtype을 먼저 출력한다.",
+        "code": "visual = image_encoder(pixel_values)      # [B,N,Cv]\nvisual = projector(visual)                # [B,N,Clm]\ninputs = concat_visual_and_text(visual, text_embeds)"
+      },
+      {
+        "heading": "초보자가 자주 놓치는 지점",
+        "body": "구현이 돌아가도 학습이 안 되거나 답이 이상할 때는 아래 항목부터 점검한다.",
+        "bullets": [
+          "이미지를 넣는다고 모든 시각 추론이 자동 해결되지는 않는다.",
+          "해상도, crop, OCR 품질이 답변 품질에 크게 영향을 준다.",
+          "시각 encoder와 언어 decoder의 토큰 길이 제한을 함께 본다."
+        ]
+      },
+      {
+        "heading": "다음 장으로 넘어가기 전 확인",
+        "body": "한 장을 끝낼 때는 정의를 외웠는지가 아니라, 입력과 출력, 비용, 실패 원인을 말할 수 있는지 확인한다.",
+        "bullets": [
+          "입력 tensor 또는 자료 구조를 말할 수 있다.",
+          "출력의 shape와 의미를 말할 수 있다.",
+          "가장 흔한 오류 하나와 확인 방법을 말할 수 있다."
         ]
       }
     ],
@@ -1232,9 +1672,11 @@ window.AI_STUDY_CURRICULUM = [
       "title": "Similarity matrix",
       "steps": [
         "이미지 3개와 문장 3개 embedding을 가정한다.",
-        "정답 pair가 diagonal인 matrix를 그린다."
+        "정답 pair가 diagonal인 matrix를 그린다.",
+        "관련 코드 조각에서 shape 주석을 직접 붙인다.",
+        "실패할 수 있는 입력 예시를 하나 만들고 원인을 적는다."
       ],
-      "expectedInsight": "멀티모달은 modality별 encoder와 shared representation 문제다."
+      "expectedInsight": "멀티모달은 modality별 encoder와 shared representation 문제다. 수업 후에는 같은 주제를 작은 입력으로 직접 재현할 수 있어야 한다."
     },
     "misconceptions": [
       "이미지 캡션 데이터만 있으면 grounding 문제가 모두 해결된다고 오해하기 쉽다."
@@ -1273,8 +1715,9 @@ window.AI_STUDY_CURRICULUM = [
       "vision-transformer"
     ],
     "learningGoals": [
-      "On-device 최적화: latency, memory, quantization, export에서 꼭 알아야 할 입력·출력과 계산 흐름을 설명한다.",
-      "코드 조각을 보고 shape 변화와 흔한 오류를 짚는다."
+      "On-device 최적화: latency, memory, quantization, export의 입력, 출력, 비용 기준을 초보자 언어로 설명한다.",
+      "On-device 최적화: latency, memory, quantization, export의 핵심 shape를 코드 출력과 연결한다.",
+      "작은 PyTorch 또는 의사코드 예제로 같은 원리를 재현한다."
     ],
     "mentalModel": {
       "conceptNote": "온디바이스 배포는 정확도, 지연시간, 메모리, 전력의 동시 제약을 맞추는 작업이다.",
@@ -1288,23 +1731,47 @@ window.AI_STUDY_CURRICULUM = [
         "code": "model.eval()\nwith torch.no_grad():\n    exported = torch.export.export(model, example_inputs)"
       },
       {
-        "heading": "기초 복습",
-        "body": "이전 내용을 자세히 기억하지 못해도 이 항목부터 다시 잡으면 된다.",
+        "heading": "처음 보는 사람을 위한 용어 정리",
+        "body": "On-device 배포는 정확도뿐 아니라 지연 시간, 메모리, 배터리, 모델 파일 크기의 균형 문제다.",
         "bullets": [
-          "On-device 배포는 정확도, latency, memory, 전력의 균형이다.",
-          "Quantization은 숫자 표현 정밀도를 낮춰 모델 크기와 연산 비용을 줄인다.",
-          "정확도 손실은 calibration과 평가셋으로 확인해야 한다.",
-          "Export 후에는 operator 지원과 fallback 여부를 확인한다.",
-          "Batch, context length, dtype이 peak memory를 크게 바꾼다."
+          "모델 선택 → quantization → export → runtime 실행 → latency/memory 측정 → 품질 회귀 확인",
+          "가중치 dtype을 FP32에서 INT8/INT4로 줄이면 메모리는 줄지만 layer별 정확도 손실을 확인해야 한다.",
+          "모르는 기호가 나오면 이 장의 shape 문장을 먼저 다시 읽는다."
         ]
       },
       {
-        "heading": "Export와 runtime",
-        "body": "PyTorch 모델을 edge runtime이 이해하는 graph로 내보내고 operator 지원, shape 제약, backend 성능을 확인한다.",
+        "heading": "수업 판서처럼 따라가는 계산 흐름",
+        "body": "아래 순서대로 손으로 화살표를 그리면 코드가 어떤 tensor를 만들고 넘기는지 빠르게 보인다.",
         "bullets": [
-          "latency budget",
-          "peak memory",
-          "fallback op 주의"
+          "모델 선택",
+          "quantization",
+          "export",
+          "runtime 실행",
+          "latency/memory 측정",
+          "품질 회귀 확인"
+        ]
+      },
+      {
+        "heading": "작은 코드로 확인하기",
+        "body": "큰 기능을 바로 쓰기보다, 같은 원리를 작은 tensor와 짧은 코드로 먼저 확인한다. 실행 결과의 값보다 shape와 dtype을 먼저 출력한다.",
+        "code": "model.eval()\nexample = torch.randint(0, V, (1, 32))\n# export 전후에 같은 입력의 출력 차이와 latency를 함께 기록한다.\nwith torch.no_grad():\n    logits = model(example)"
+      },
+      {
+        "heading": "초보자가 자주 놓치는 지점",
+        "body": "구현이 돌아가도 학습이 안 되거나 답이 이상할 때는 아래 항목부터 점검한다.",
+        "bullets": [
+          "양자화는 항상 속도를 올리는 것이 아니라 hardware/runtime 의존적이다.",
+          "평균 latency만 보면 첫 실행 비용이나 p95 지연을 놓친다.",
+          "export 성공과 실제 디바이스 품질은 별도 검증이다."
+        ]
+      },
+      {
+        "heading": "다음 장으로 넘어가기 전 확인",
+        "body": "한 장을 끝낼 때는 정의를 외웠는지가 아니라, 입력과 출력, 비용, 실패 원인을 말할 수 있는지 확인한다.",
+        "bullets": [
+          "입력 tensor 또는 자료 구조를 말할 수 있다.",
+          "출력의 shape와 의미를 말할 수 있다.",
+          "가장 흔한 오류 하나와 확인 방법을 말할 수 있다."
         ]
       }
     ],
@@ -1312,9 +1779,11 @@ window.AI_STUDY_CURRICULUM = [
       "title": "배포 예산표",
       "steps": [
         "목표 latency와 memory를 정한다.",
-        "fp16/int8 weight 크기를 비교한다."
+        "fp16/int8 weight 크기를 비교한다.",
+        "관련 코드 조각에서 shape 주석을 직접 붙인다.",
+        "실패할 수 있는 입력 예시를 하나 만들고 원인을 적는다."
       ],
-      "expectedInsight": "on-device 최적화는 모델 구조와 런타임 제약의 공동 설계다."
+      "expectedInsight": "on-device 최적화는 모델 구조와 런타임 제약의 공동 설계다. 수업 후에는 같은 주제를 작은 입력으로 직접 재현할 수 있어야 한다."
     },
     "misconceptions": [
       "quantization은 항상 정확도 손실 없이 빨라진다고 오해하기 쉽다."
@@ -1354,8 +1823,9 @@ window.AI_STUDY_CURRICULUM = [
       "on-device-optimization"
     ],
     "learningGoals": [
-      "미니 프로젝트 지도: tiny transformer, RAG eval, on-device lab에서 꼭 알아야 할 입력·출력과 계산 흐름을 설명한다.",
-      "코드 조각을 보고 shape 변화와 흔한 오류를 짚는다."
+      "미니 프로젝트 지도: tiny transformer, RAG eval, on-device lab의 입력, 출력, 비용 기준을 초보자 언어로 설명한다.",
+      "미니 프로젝트 지도: tiny transformer, RAG eval, on-device lab의 핵심 shape를 코드 출력과 연결한다.",
+      "작은 PyTorch 또는 의사코드 예제로 같은 원리를 재현한다."
     ],
     "mentalModel": {
       "conceptNote": "세 프로젝트는 구현, 평가, 배포 제약을 각각 검증 가능한 산출물로 만든다.",
@@ -1369,22 +1839,47 @@ window.AI_STUDY_CURRICULUM = [
         "code": "assert loss_after < loss_before"
       },
       {
-        "heading": "기초 복습",
-        "body": "이전 내용을 자세히 기억하지 못해도 이 항목부터 다시 잡으면 된다.",
+        "heading": "처음 보는 사람을 위한 용어 정리",
+        "body": "최종 프로젝트는 작은 decoder, 평가셋, 경량 배포를 한 번에 엮어 전체 의사결정 흐름을 연습하는 장이다.",
         "bullets": [
-          "프로젝트는 크게 만들기보다 검증 가능한 단위로 나눈다.",
-          "Tiny Transformer는 loss 감소가 1차 성공 기준이다.",
-          "RAG 평가는 고정 질문과 기대 답변을 먼저 만든다.",
-          "On-device 실험은 quantization 전후 latency와 memory를 비교한다.",
-          "각 프로젝트는 입력, 출력, 성공 기준을 한 줄로 적고 시작한다."
+          "목표 정의 → 데이터 준비 → tiny model 학습 → 평가 → 최적화 → 결과 노트",
+          "학습에서는 [B,T]와 [B,T,V], 평가에서는 사례별 score table, 배포에서는 latency/memory 표를 남긴다.",
+          "모르는 기호가 나오면 이 장의 shape 문장을 먼저 다시 읽는다."
         ]
       },
       {
-        "heading": "프로젝트 2~3",
-        "body": "RAG regression set과 on-device compression lab을 별도 트랙으로 둔다.",
+        "heading": "수업 판서처럼 따라가는 계산 흐름",
+        "body": "아래 순서대로 손으로 화살표를 그리면 코드가 어떤 tensor를 만들고 넘기는지 빠르게 보인다.",
         "bullets": [
-          "RAG: 20개 회귀 질문",
-          "On-device: quantization 전후 latency/memory 비교"
+          "목표 정의",
+          "데이터 준비",
+          "tiny model 학습",
+          "평가",
+          "최적화",
+          "결과 노트"
+        ]
+      },
+      {
+        "heading": "작은 코드로 확인하기",
+        "body": "큰 기능을 바로 쓰기보다, 같은 원리를 작은 tensor와 짧은 코드로 먼저 확인한다. 실행 결과의 값보다 shape와 dtype을 먼저 출력한다.",
+        "code": "run = {\n  \"train_loss\": train_loss,\n  \"valid_loss\": valid_loss,\n  \"p95_latency_ms\": latency,\n  \"known_failures\": failures,\n}"
+      },
+      {
+        "heading": "초보자가 자주 놓치는 지점",
+        "body": "구현이 돌아가도 학습이 안 되거나 답이 이상할 때는 아래 항목부터 점검한다.",
+        "bullets": [
+          "프로젝트 범위를 크게 잡으면 완주보다 설정만 하다 끝난다.",
+          "정량 지표 없이 느낌으로 개선을 판단하지 않는다.",
+          "실패 사례를 지우지 말고 다음 개선 항목으로 남긴다."
+        ]
+      },
+      {
+        "heading": "다음 장으로 넘어가기 전 확인",
+        "body": "한 장을 끝낼 때는 정의를 외웠는지가 아니라, 입력과 출력, 비용, 실패 원인을 말할 수 있는지 확인한다.",
+        "bullets": [
+          "입력 tensor 또는 자료 구조를 말할 수 있다.",
+          "출력의 shape와 의미를 말할 수 있다.",
+          "가장 흔한 오류 하나와 확인 방법을 말할 수 있다."
         ]
       }
     ],
@@ -1392,9 +1887,11 @@ window.AI_STUDY_CURRICULUM = [
       "title": "2주 실행 계획",
       "steps": [
         "가장 약한 트랙 하나를 고른다.",
-        "입력, 출력, 성공 기준을 한 줄씩 쓴다."
+        "입력, 출력, 성공 기준을 한 줄씩 쓴다.",
+        "관련 코드 조각에서 shape 주석을 직접 붙인다.",
+        "실패할 수 있는 입력 예시를 하나 만들고 원인을 적는다."
       ],
-      "expectedInsight": "각 장의 개념이 검증 가능한 산출물로 바뀐다."
+      "expectedInsight": "각 장의 개념이 검증 가능한 산출물로 바뀐다. 수업 후에는 같은 주제를 작은 입력으로 직접 재현할 수 있어야 한다."
     },
     "misconceptions": [
       "프로젝트는 무조건 크고 복잡해야 한다고 오해하기 쉽다."
@@ -1432,8 +1929,9 @@ window.AI_STUDY_CURRICULUM = [
       "overview"
     ],
     "learningGoals": [
-      "수업 전 체크리스트와 source map에서 꼭 알아야 할 입력·출력과 계산 흐름을 설명한다.",
-      "코드 조각을 보고 shape 변화와 흔한 오류를 짚는다."
+      "수업 전 체크리스트와 source map의 입력, 출력, 비용 기준을 초보자 언어로 설명한다.",
+      "수업 전 체크리스트와 source map의 핵심 shape를 코드 출력과 연결한다.",
+      "작은 PyTorch 또는 의사코드 예제로 같은 원리를 재현한다."
     ],
     "mentalModel": {
       "conceptNote": "마지막 점검은 약한 개념을 찾고 공식 출처로 되돌아가는 복습 루프다.",
@@ -1454,29 +1952,58 @@ window.AI_STUDY_CURRICULUM = [
         ]
       },
       {
-        "heading": "기초 복습",
-        "body": "이전 내용을 자세히 기억하지 못해도 이 항목부터 다시 잡으면 된다.",
+        "heading": "처음 보는 사람을 위한 용어 정리",
+        "body": "좋은 교안은 배운 내용을 다시 찾을 수 있어야 한다. 공식 문서, 대학 강의, 구현 예제를 나눠 출처를 관리한다.",
         "bullets": [
-          "모르는 항목을 숨기지 말고 해당 장으로 되돌아간다.",
-          "Shape, gradient, attention, cache, adapter, patch token을 우선 점검한다.",
-          "공식 문서는 구현 세부가 바뀔 때 다시 확인한다.",
-          "논문은 원리를 볼 때, 문서는 API 사용을 확인할 때 본다.",
-          "체크리스트는 암기표가 아니라 약한 부분을 찾는 도구다."
+          "개념 확인 → 공식 API 확인 → 강의 노트로 배경 이해 → 작은 코드로 재현 → 체크리스트 갱신",
+          "학습 노트에는 장 id, 핵심 shape, 실행한 코드, 실패 원인, 참고 URL을 함께 둔다.",
+          "모르는 기호가 나오면 이 장의 shape 문장을 먼저 다시 읽는다."
         ]
       },
       {
-        "heading": "Source map",
-        "body": "아래 출처 목록은 renderer가 전체 챕터 sources를 모아 다시 보여준다.",
-        "code": "for chapter in curriculum: print(chapter.id, chapter.sources)"
+        "heading": "수업 판서처럼 따라가는 계산 흐름",
+        "body": "아래 순서대로 손으로 화살표를 그리면 코드가 어떤 tensor를 만들고 넘기는지 빠르게 보인다.",
+        "bullets": [
+          "개념 확인",
+          "공식 API 확인",
+          "강의 노트로 배경 이해",
+          "작은 코드로 재현",
+          "체크리스트 갱신"
+        ]
+      },
+      {
+        "heading": "작은 코드로 확인하기",
+        "body": "큰 기능을 바로 쓰기보다, 같은 원리를 작은 tensor와 짧은 코드로 먼저 확인한다. 실행 결과의 값보다 shape와 dtype을 먼저 출력한다.",
+        "code": "note = {\n  \"chapter\": \"attention-mask\",\n  \"shape\": \"score [B,H,T,T]\",\n  \"check\": \"mask before softmax\",\n  \"source\": \"PyTorch SDPA docs\",\n}"
+      },
+      {
+        "heading": "초보자가 자주 놓치는 지점",
+        "body": "구현이 돌아가도 학습이 안 되거나 답이 이상할 때는 아래 항목부터 점검한다.",
+        "bullets": [
+          "블로그 글만 보고 API 세부 동작을 확정하지 않는다.",
+          "출처를 읽어도 직접 작은 코드로 확인하지 않으면 오래 남지 않는다.",
+          "복습 체크리스트는 완벽한 요약보다 다음 행동을 알려줘야 한다."
+        ]
+      },
+      {
+        "heading": "다음 장으로 넘어가기 전 확인",
+        "body": "한 장을 끝낼 때는 정의를 외웠는지가 아니라, 입력과 출력, 비용, 실패 원인을 말할 수 있는지 확인한다.",
+        "bullets": [
+          "입력 tensor 또는 자료 구조를 말할 수 있다.",
+          "출력의 shape와 의미를 말할 수 있다.",
+          "가장 흔한 오류 하나와 확인 방법을 말할 수 있다."
+        ]
       }
     ],
     "lab": {
       "title": "마지막 30분 복습",
       "steps": [
         "모르는 체크 3개를 고른다.",
-        "공식 문서 링크를 하나씩 다시 연다."
+        "공식 문서 링크를 하나씩 다시 연다.",
+        "관련 코드 조각에서 shape 주석을 직접 붙인다.",
+        "실패할 수 있는 입력 예시를 하나 만들고 원인을 적는다."
       ],
-      "expectedInsight": "강의 전 자기 점검 루프를 갖는다."
+      "expectedInsight": "강의 전 자기 점검 루프를 갖는다. 수업 후에는 같은 주제를 작은 입력으로 직접 재현할 수 있어야 한다."
     },
     "misconceptions": [
       "모든 코드를 외워야 수업을 따라갈 수 있다고 오해하기 쉽다."

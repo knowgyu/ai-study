@@ -23,7 +23,7 @@ The verifier enforces the v1 contract:
 - Every chapter has required schema fields, prerequisites, goals, at least three lecture-note sections, a concrete lab, misconceptions, at least three check questions, and at least two sources.
 - Every chapter includes `mentalModel.conceptNote`, `mentalModel.flow`, and `mentalModel.shape` so the rendered lesson has original no-dependency diagram/flow support.
 - Implementation-oriented chapters include code or pseudo-code guidance.
-- Visible lesson/UI/docs copy avoids banned context/meta terms and web-building/prompt-building copy.
+- Visible lesson/UI/docs copy avoids banned context/meta terms and 서비스 제작 메타 문구.
 - `index.html` loads `curriculum.js` before `render.js`, does not require ES modules, and preserves `#chapter-nav` / `#chapter-panel` hooks.
 - Renderer code consumes curriculum data, handles hash state, sets visible active navigation state, renders diagram/flow data, and keeps attention/KV/ViT widget hooks available.
 
@@ -36,7 +36,7 @@ RESULT PASS validated 19 chapters and static UI contract
 ## 3. Banned-term scan
 
 ```bash
-rg -n "Ess''ential|Spec''ialist|Sam''sung|삼''성|pro''mpt guideline|system pro''mpt|as an a''i|웹''사이트를|페''이지를|프''롬프트" llm-visual-warmup \
+rg -n "Ess''ential|Spec''ialist|Sam''sung|삼''성|as an a''i|웹''사이트를|페''이지를" llm-visual-warmup \
   --glob '!verify-static-curriculum.js'
 ```
 

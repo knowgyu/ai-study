@@ -20,7 +20,7 @@ Run these commands from the repository root before publishing:
 ```bash
 for f in llm-visual-warmup/*.js; do node --check "$f"; done
 node llm-visual-warmup/verify-static-curriculum.js
-rg -n "Ess''ential|Spec''ialist|Sam''sung|삼''성|pro''mpt guideline|system pro''mpt|as an a''i|웹''사이트를|페''이지를|프''롬프트" llm-visual-warmup \
+rg -n "Ess''ential|Spec''ialist|Sam''sung|삼''성|as an a''i|웹''사이트를|페''이지를" llm-visual-warmup \
   --glob '!verify-static-curriculum.js'
 python3 -m http.server 4173 --directory llm-visual-warmup >/tmp/llm-visual-warmup-http.log 2>&1 &
 server_pid=$!

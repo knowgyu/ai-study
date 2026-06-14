@@ -146,7 +146,7 @@ function flattenText(value) {
 
 function validateNoMetaCopy(label, text) {
   for (const pattern of DISALLOWED_META_COPY_PATTERNS) {
-    assertCheck(!pattern.test(text), `${label} does not contain website/prompt-building meta copy: ${pattern}`);
+    assertCheck(!pattern.test(text), `${label} does not contain service-building meta copy: ${pattern}`);
   }
 }
 
