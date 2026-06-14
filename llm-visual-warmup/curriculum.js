@@ -1,50 +1,50 @@
 window.AI_STUDY_CURRICULUM = [
   {
     "id": "overview",
-    "stage": "Orientation",
-    "title": "전체 흐름: Essential에서 Specialist로",
-    "oneLiner": "AI 앱을 써보는 단계에서 모델 내부 계산을 읽는 단계로 넘어간다.",
-    "whyNow": "Agent/RAG를 다뤄봤다면 다음에는 token, tensor, attention, 추론 비용을 이해해야 한다.",
+    "stage": "오리엔테이션",
+    "title": "전체 지도: Essential에서 Specialist로",
+    "oneLiner": "앱을 조립하던 관점에서 모델 내부를 읽는 관점으로 이동한다.",
+    "whyNow": "Agent/RAG를 이미 써봤다면 다음 병목은 모델이 입력을 어떻게 표현하고 추론을 어떻게 수행하는지 이해하는 것이다.",
     "prerequisites": [],
     "learningGoals": [
       "전체 지도: Essential에서 Specialist로의 핵심 개념을 shape, 코드 흐름, 비용 관점에서 설명한다.",
-      "입력 shape, 출력 shape, 자주 나는 오류를 함께 확인한다."
+      "짧은 실습과 self-check로 입력·출력 계약과 흔한 실수를 확인한다."
     ],
     "mentalModel": {
-      "metaphor": "학습 순서는 PyTorch 기초 → Transformer 구현 → 추론/튜닝 → Vision/On-device 순서로 잡는다.",
+      "conceptNote": "먼저 학습 순서를 잡고, 각 장에서 입력·출력·비용 기준을 확인한다.",
       "flow": "Essential 앱 레이어 → Tensor/Module → Transformer → 추론/튜닝 → Vision/On-device",
       "shape": "모든 장은 [data]→[B,T,C]→logits→loss 또는 token latency로 연결된다."
     },
     "sections": [
       {
-        "heading": "먼저 잡을 큰 흐름",
-        "body": "이 교안은 모델을 직접 구현하거나 읽을 때 필요한 최소 흐름을 정리한다.",
+        "heading": "강의 흐름",
+        "body": "19개 장을 통해 PyTorch 기본기, Transformer 구현, inference 최적화, LoRA, data/eval, ViT, on-device 흐름을 하나의 로드맵으로 묶는다.",
         "bullets": [
-          "코드 한 줄마다 tensor shape를 확인한다",
-          "학습 비용과 추론 비용을 따로 본다",
-          "공식 문서와 강의 자료로 개념을 다시 확인한다"
+          "코드 암기보다 shape 추적",
+          "학습과 추론 병목 분리",
+          "출처 기반 복습"
         ]
       },
       {
-        "heading": "LLM 호출 아래에서 일어나는 일",
-        "body": "겉으로는 API 호출처럼 보이지만 내부에서는 tokenization, forward, sampling, 후처리가 순서대로 일어난다.",
-        "code": "response = agent.invoke(user_query)\n# 내부 흐름: tokenize → model forward → sampling/decode → app 후처리"
+        "heading": "앱 호출 아래의 계산 흐름",
+        "body": "LLM 앱 호출 뒤에는 항상 tensor 계산과 sampling 정책이 있다.",
+        "code": "response = agent.invoke(user_query) # 내부에는 tokenize → model forward → decode → tool/RAG orchestration 흐름이 숨어 있다."
       }
     ],
     "lab": {
-      "title": "현재 위치 확인",
+      "title": "개인 로드맵 그리기",
       "steps": [
-        "이미 아는 주제와 다시 볼 주제를 나눈다.",
-        "각 장에서 설명할 수 있어야 하는 핵심 질문을 하나씩 확인한다."
+        "아는 주제와 낯선 주제를 표시한다.",
+        "각 장의 최소 성공 문장을 한 줄로 쓴다."
       ],
-      "expectedInsight": "어떤 개념을 먼저 보강해야 하는지 정리한다."
+      "expectedInsight": "전체 과정이 앱 개발, 모델 구현, 배포 최적화로 이어진다는 그림을 얻는다."
     },
     "misconceptions": [
-      "Specialist 학습을 화면 구현이나 서비스 포장 문제로만 보면 모델 내부 병목을 놓친다."
+      "Specialist 준비가 서비스 UI를 더 많이 만드는 과정이라고 혼동한다."
     ],
     "checks": [
-      "Tensor와 autograd를 알아야 하는 이유를 설명할 수 있는가?",
-      "학습 비용과 추론 비용의 차이를 구분할 수 있는가?"
+      "PyTorch를 먼저 보는 이유를 말할 수 있는가?",
+      "학습 최적화와 추론 최적화를 구분할 수 있는가?"
     ],
     "next": [
       "essential-bridge"
@@ -66,17 +66,17 @@ window.AI_STUDY_CURRICULUM = [
   },
   {
     "id": "essential-bridge",
-    "stage": "Orientation",
+    "stage": "오리엔테이션",
     "title": "Essential 복습: Agent·RAG·LangGraph와 모델 내부",
     "oneLiner": "Agent와 RAG는 모델을 둘러싼 제품/평가 레이어이고, Specialist는 그 아래 계산을 읽는다.",
     "whyNow": "이미 배운 tool calling, RAG, structured output을 모델 내부와 분리해야 어디를 튜닝할지 판단할 수 있다.",
     "prerequisites": [],
     "learningGoals": [
       "Essential 복습: Agent·RAG·LangGraph와 모델 내부의 핵심 개념을 shape, 코드 흐름, 비용 관점에서 설명한다.",
-      "입력 shape, 출력 shape, 자주 나는 오류를 함께 확인한다."
+      "짧은 실습과 self-check로 입력·출력 계약과 흔한 실수를 확인한다."
     ],
     "mentalModel": {
-      "metaphor": "Agent/RAG/LangGraph는 앱 오케스트레이션이고, Tensor/Module/Attention은 모델 계산이다.",
+      "conceptNote": "Agent/RAG/LangGraph는 앱 오케스트레이션이고, Tensor/Module/Attention은 모델 계산이다.",
       "flow": "User → retriever/tool graph → model tokens → structured answer → evaluator",
       "shape": "문서는 chunk list, 모델 입력은 token ids [B,T], 출력은 logits [B,T,V]다."
     },
@@ -92,7 +92,7 @@ window.AI_STUDY_CURRICULUM = [
       {
         "heading": "실패 분류 실습",
         "body": "같은 질문에서 검색 실패와 모델 추론 실패를 분리해 기록한다.",
-        "code": "trace = {'retrieved': docs, 'context_tokens': n, 'answer': answer}\nassert len(trace['retrieved']) > 0"
+        "code": "trace = {'retrieved': docs, 'context_tokens': n, 'answer': answer} assert len(trace['retrieved']) > 0"
       }
     ],
     "lab": {
@@ -140,10 +140,10 @@ window.AI_STUDY_CURRICULUM = [
     ],
     "learningGoals": [
       "Tensor와 shape 읽기의 핵심 개념을 shape, 코드 흐름, 비용 관점에서 설명한다.",
-      "입력 shape, 출력 shape, 자주 나는 오류를 함께 확인한다."
+      "짧은 실습과 self-check로 입력·출력 계약과 흔한 실수를 확인한다."
     ],
     "mentalModel": {
-      "metaphor": "shape 표기는 코드의 타입 정보처럼 읽는다. 축 이름이 바뀌면 연산 의미도 바뀐다.",
+      "conceptNote": "shape 표기는 코드의 타입 정보처럼 읽는다. 축 이름이 바뀌면 연산 의미도 바뀐다.",
       "flow": "[B,T,C] → split heads [B,H,T,D] → score [B,H,T,T]",
       "shape": "B=batch, T=tokens, C=hidden, H=heads, D=head_dim"
     },
@@ -151,7 +151,7 @@ window.AI_STUDY_CURRICULUM = [
       {
         "heading": "핵심 개념",
         "body": "view, reshape, transpose, permute는 데이터를 보는 관점을 바꾼다. attention에서는 hidden C를 head H와 D로 나누는 순간이 중요하다.",
-        "code": "x = torch.randn(B, T, C)\nqkv = linear(x).view(B, T, 3, H, D)\nq, k, v = qkv.unbind(dim=2)\nq = q.transpose(1, 2)  # [B, H, T, D]"
+        "code": "x = torch.randn(B, T, C) qkv = linear(x).view(B, T, 3, H, D) q, k, v = qkv.unbind(dim=2) q = q.transpose(1, 2) # [B, H, T, D]"
       },
       {
         "heading": "Shape 흐름",
@@ -207,10 +207,10 @@ window.AI_STUDY_CURRICULUM = [
     ],
     "learningGoals": [
       "Autograd와 학습 루프의 핵심 개념을 shape, 코드 흐름, 비용 관점에서 설명한다.",
-      "입력 shape, 출력 shape, 자주 나는 오류를 함께 확인한다."
+      "짧은 실습과 self-check로 입력·출력 계약과 흔한 실수를 확인한다."
     ],
     "mentalModel": {
-      "metaphor": "Autograd는 forward 계산 그래프를 저장하고 backward에서 parameter.grad를 채운다.",
+      "conceptNote": "Autograd는 forward 계산 그래프를 저장하고 backward에서 parameter.grad를 채운다.",
       "flow": "forward → loss → zero_grad → backward → step",
       "shape": "logits [B,T,V], target [B,T], loss scalar"
     },
@@ -218,7 +218,7 @@ window.AI_STUDY_CURRICULUM = [
       {
         "heading": "핵심 개념",
         "body": "requires_grad가 켜진 leaf parameter는 backward 뒤 .grad를 가진다. optimizer는 loss가 아니라 grad만 보고 값을 갱신한다.",
-        "code": "for x, y in loader:\n    logits = model(x)\n    loss = F.cross_entropy(logits.view(-1, V), y.view(-1))\n    optimizer.zero_grad()\n    loss.backward()\n    optimizer.step()"
+        "code": "for x, y in loader: logits = model(x) loss = F.cross_entropy(logits.view(-1, V), y.view(-1)) optimizer.zero_grad() loss.backward() optimizer.step()"
       },
       {
         "heading": "실무 연결",
@@ -274,10 +274,10 @@ window.AI_STUDY_CURRICULUM = [
     ],
     "learningGoals": [
       "nn.Module, state_dict, train/eval의 핵심 개념을 shape, 코드 흐름, 비용 관점에서 설명한다.",
-      "입력 shape, 출력 shape, 자주 나는 오류를 함께 확인한다."
+      "짧은 실습과 self-check로 입력·출력 계약과 흔한 실수를 확인한다."
     ],
     "mentalModel": {
-      "metaphor": "Module은 layer 등록, forward 계약, state_dict 저장 규칙을 묶는 단위다.",
+      "conceptNote": "Module은 layer 등록, forward 계약, state_dict 저장 규칙을 묶는 단위다.",
       "flow": "__init__ registers layers → forward connects flow → state_dict saves tensors",
       "shape": "각 named_parameter는 weight shape와 gradient 상태를 가진다."
     },
@@ -285,7 +285,7 @@ window.AI_STUDY_CURRICULUM = [
       {
         "heading": "핵심 개념",
         "body": "__init__에 layer를 attribute로 등록하면 parameters()와 state_dict()에 잡힌다. forward는 데이터 흐름만 적는다.",
-        "code": "class Block(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.attn = SelfAttention()\n        self.mlp = MLP()\n    def forward(self, x):\n        x = x + self.attn(norm(x))\n        return x + self.mlp(norm(x))"
+        "code": "class Block(nn.Module): def __init__(self): super().__init__() self.attn = SelfAttention() self.mlp = MLP() def forward(self, x): x = x + self.attn(norm(x)) return x + self.mlp(norm(x))"
       },
       {
         "heading": "train/eval 구분",
@@ -341,10 +341,10 @@ window.AI_STUDY_CURRICULUM = [
     ],
     "learningGoals": [
       "Dataset, DataLoader, collate, split의 핵심 개념을 shape, 코드 흐름, 비용 관점에서 설명한다.",
-      "입력 shape, 출력 shape, 자주 나는 오류를 함께 확인한다."
+      "짧은 실습과 self-check로 입력·출력 계약과 흔한 실수를 확인한다."
     ],
     "mentalModel": {
-      "metaphor": "Dataset은 sample 계약, DataLoader는 batch 계약, collate는 묶는 규칙이다.",
+      "conceptNote": "Dataset은 sample 계약, DataLoader는 batch 계약, collate는 묶는 규칙이다.",
       "flow": "raw examples → Dataset sample → collate batch → model input",
       "shape": "sample [T], batch [B,T], label [B,T]"
     },
@@ -352,7 +352,7 @@ window.AI_STUDY_CURRICULUM = [
       {
         "heading": "핵심 개념",
         "body": "Dataset은 index 하나를 sample 하나로 바꾸고 DataLoader는 여러 sample을 batch로 묶는다.",
-        "code": "class TextDataset(Dataset):\n    def __getitem__(self, i):\n        chunk = ids[i:i+block_size+1]\n        return chunk[:-1], chunk[1:]"
+        "code": "class TextDataset(Dataset): def __getitem__(self, i): chunk = ids[i:i+block_size+1] return chunk[:-1], chunk[1:]"
       },
       {
         "heading": "collate와 데이터 분리",
@@ -408,10 +408,10 @@ window.AI_STUDY_CURRICULUM = [
     ],
     "learningGoals": [
       "Tokenization, embedding, position의 핵심 개념을 shape, 코드 흐름, 비용 관점에서 설명한다.",
-      "입력 shape, 출력 shape, 자주 나는 오류를 함께 확인한다."
+      "짧은 실습과 self-check로 입력·출력 계약과 흔한 실수를 확인한다."
     ],
     "mentalModel": {
-      "metaphor": "텍스트는 token id가 되고, embedding table lookup으로 [B,T,C] 표현이 된다.",
+      "conceptNote": "텍스트는 token id가 되고, embedding table lookup으로 [B,T,C] 표현이 된다.",
       "flow": "text → token ids [B,T] → token embedding [B,T,C] + position [T,C]",
       "shape": "input_ids [B,T], embeddings [B,T,C]"
     },
@@ -419,7 +419,7 @@ window.AI_STUDY_CURRICULUM = [
       {
         "heading": "핵심 개념",
         "body": "Embedding은 one-hot matrix multiply와 같은 효과지만 table lookup으로 구현된다.",
-        "code": "tok = nn.Embedding(vocab, C)(input_ids)\npos = nn.Embedding(block, C)(positions)\nx = tok + pos"
+        "code": "tok = nn.Embedding(vocab, C)(input_ids) pos = nn.Embedding(block, C)(positions) x = tok + pos"
       },
       {
         "heading": "Position 정보",
@@ -474,10 +474,10 @@ window.AI_STUDY_CURRICULUM = [
     ],
     "learningGoals": [
       "Scaled dot-product attention과 causal mask의 핵심 개념을 shape, 코드 흐름, 비용 관점에서 설명한다.",
-      "입력 shape, 출력 shape, 자주 나는 오류를 함께 확인한다."
+      "짧은 실습과 self-check로 입력·출력 계약과 흔한 실수를 확인한다."
     ],
     "mentalModel": {
-      "metaphor": "Attention은 token 간 score 행렬을 만들고, causal mask로 미래 정답 누수를 막는다.",
+      "conceptNote": "Attention은 token 간 score 행렬을 만들고, causal mask로 미래 정답 누수를 막는다.",
       "flow": "Q,K,V → QKᵀ/√D → mask → softmax → weighted V",
       "shape": "q/k/v [B,H,T,D], score [B,H,T,T]"
     },
@@ -485,7 +485,7 @@ window.AI_STUDY_CURRICULUM = [
       {
         "heading": "핵심 개념",
         "body": "Query는 찾는 관점, Key는 주소, Value는 섞일 내용이다. causal mask는 다음 token 정답 누수를 막는다.",
-        "code": "scores = q @ k.transpose(-2, -1) / math.sqrt(d)\nscores = scores.masked_fill(causal_mask == 0, -float('inf'))\nweights = scores.softmax(dim=-1)\nout = weights @ v",
+        "code": "scores = q @ k.transpose(-2, -1) / math.sqrt(d) scores = scores.masked_fill(causal_mask == 0, -float('inf')) weights = scores.softmax(dim=-1) out = weights @ v",
         "widget": "attention"
       },
       {
@@ -541,10 +541,10 @@ window.AI_STUDY_CURRICULUM = [
     ],
     "learningGoals": [
       "Multi-head attention과 Transformer block의 핵심 개념을 shape, 코드 흐름, 비용 관점에서 설명한다.",
-      "입력 shape, 출력 shape, 자주 나는 오류를 함께 확인한다."
+      "짧은 실습과 self-check로 입력·출력 계약과 흔한 실수를 확인한다."
     ],
     "mentalModel": {
-      "metaphor": "Block은 token mixing(attention)과 channel mixing(MLP)을 residual로 반복한다.",
+      "conceptNote": "Block은 token mixing(attention)과 channel mixing(MLP)을 residual로 반복한다.",
       "flow": "norm → attention → residual → norm → MLP → residual",
       "shape": "입출력은 계속 [B,T,C]를 유지한다."
     },
@@ -552,7 +552,7 @@ window.AI_STUDY_CURRICULUM = [
       {
         "heading": "핵심 개념",
         "body": "head마다 다른 관계 공간을 보고 concat 뒤 projection으로 다시 C 차원에 맞춘다.",
-        "code": "class Block(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.attn = SelfAttention()\n        self.mlp = MLP()\n    def forward(self, x):\n        x = x + self.attn(norm(x))\n        return x + self.mlp(norm(x))"
+        "code": "class Block(nn.Module): def __init__(self): super().__init__() self.attn = SelfAttention() self.mlp = MLP() def forward(self, x): x = x + self.attn(norm(x)) return x + self.mlp(norm(x))"
       },
       {
         "heading": "Residual과 LayerNorm",
@@ -608,10 +608,10 @@ window.AI_STUDY_CURRICULUM = [
     ],
     "learningGoals": [
       "Tiny decoder LM 학습 루프의 핵심 개념을 shape, 코드 흐름, 비용 관점에서 설명한다.",
-      "입력 shape, 출력 shape, 자주 나는 오류를 함께 확인한다."
+      "짧은 실습과 self-check로 입력·출력 계약과 흔한 실수를 확인한다."
     ],
     "mentalModel": {
-      "metaphor": "언어모델 학습은 x와 한 칸 밀린 y를 맞히는 next-token 루프다.",
+      "conceptNote": "언어모델 학습은 x와 한 칸 밀린 y를 맞히는 next-token 루프다.",
       "flow": "ids → embedding → N blocks → lm_head → cross entropy",
       "shape": "logits [B,T,V], target [B,T]"
     },
@@ -619,7 +619,7 @@ window.AI_STUDY_CURRICULUM = [
       {
         "heading": "핵심 개념",
         "body": "decoder LM은 각 위치에서 다음 token을 맞히도록 학습한다. y는 x보다 한 칸 미래다.",
-        "code": "for x, y in loader:\n    logits = model(x)\n    loss = F.cross_entropy(logits.view(-1, V), y.view(-1))\n    optimizer.zero_grad()\n    loss.backward()\n    optimizer.step()"
+        "code": "for x, y in loader: logits = model(x) loss = F.cross_entropy(logits.view(-1, V), y.view(-1)) optimizer.zero_grad() loss.backward() optimizer.step()"
       },
       {
         "heading": "Loss shape 처리",
@@ -675,10 +675,10 @@ window.AI_STUDY_CURRICULUM = [
     ],
     "learningGoals": [
       "Generation, sampling, KV cache의 핵심 개념을 shape, 코드 흐름, 비용 관점에서 설명한다.",
-      "입력 shape, 출력 shape, 자주 나는 오류를 함께 확인한다."
+      "짧은 실습과 self-check로 입력·출력 계약과 흔한 실수를 확인한다."
     ],
     "mentalModel": {
-      "metaphor": "생성은 prefill과 decode로 나뉘며, KV cache는 과거 K/V 재계산을 줄인다.",
+      "conceptNote": "생성은 prefill과 decode로 나뉘며, KV cache는 과거 K/V 재계산을 줄인다.",
       "flow": "prefill 입력 컨텍스트 → decode one token → append K/V cache → sample",
       "shape": "cache roughly [layers, B, H, T, D] for K and V"
     },
@@ -686,7 +686,7 @@ window.AI_STUDY_CURRICULUM = [
       {
         "heading": "핵심 개념",
         "body": "KV cache는 과거 token의 Key/Value를 저장해 새 token 생성 때 prefix 재계산을 줄인다.",
-        "code": "past_kv = None\nfor _ in range(max_new_tokens):\n    logits, past_kv = model(input_ids[:, -1:], past_key_values=past_kv)\n    input_ids = torch.cat([input_ids, sample(logits)], dim=1)",
+        "code": "past_kv = None for _ in range(max_new_tokens): logits, past_kv = model(input_ids[:, -1:], past_key_values=past_kv) input_ids = torch.cat([input_ids, sample(logits)], dim=1)",
         "widget": "kv-cache"
       },
       {
@@ -744,10 +744,10 @@ window.AI_STUDY_CURRICULUM = [
     ],
     "learningGoals": [
       "Fine-tuning, LoRA, QLoRA, adapter merge의 핵심 개념을 shape, 코드 흐름, 비용 관점에서 설명한다.",
-      "입력 shape, 출력 shape, 자주 나는 오류를 함께 확인한다."
+      "짧은 실습과 self-check로 입력·출력 계약과 흔한 실수를 확인한다."
     ],
     "mentalModel": {
-      "metaphor": "LoRA는 base weight를 고정하고 low-rank adapter만 학습해 파라미터 예산을 줄인다.",
+      "conceptNote": "LoRA는 base weight를 고정하고 low-rank adapter만 학습해 파라미터 예산을 줄인다.",
       "flow": "freeze base W → train A/B adapters → optionally merge for inference",
       "shape": "W [out,in], A [r,in], B [out,r]"
     },
@@ -755,7 +755,7 @@ window.AI_STUDY_CURRICULUM = [
       {
         "heading": "핵심 개념",
         "body": "rank r이 작으면 학습 파라미터와 optimizer state를 크게 줄일 수 있다.",
-        "code": "# pseudo PyTorch: W는 freeze, A/B adapter만 학습\nbase.weight.requires_grad_(False)\ny = x @ W.T + scale * (x @ A.T @ B.T)"
+        "code": "# pseudo PyTorch: W는 freeze, A/B adapter만 학습 base.weight.requires_grad_(False) y = x @ W.T + scale * (x @ A.T @ B.T)"
       },
       {
         "heading": "QLoRA와 adapter 운용",
@@ -812,10 +812,10 @@ window.AI_STUDY_CURRICULUM = [
     ],
     "learningGoals": [
       "Data quality, RAG evaluation, regression set의 핵심 개념을 shape, 코드 흐름, 비용 관점에서 설명한다.",
-      "입력 shape, 출력 shape, 자주 나는 오류를 함께 확인한다."
+      "짧은 실습과 self-check로 입력·출력 계약과 흔한 실수를 확인한다."
     ],
     "mentalModel": {
-      "metaphor": "평가셋은 개선 방향을 고정하는 기준선이다. 사례, 기대 동작, 실패 유형을 함께 둔다.",
+      "conceptNote": "평가셋은 개선 방향을 고정하는 기준선이다. 사례, 기대 동작, 실패 유형을 함께 둔다.",
       "flow": "collect cases → label expected behavior → run model/RAG → judge → regressions",
       "shape": "eval case는 input, expected, metadata, score로 구조화된다."
     },
@@ -823,7 +823,7 @@ window.AI_STUDY_CURRICULUM = [
       {
         "heading": "핵심 개념",
         "body": "RAG 평가는 검색 적합도와 답변 정확도를 분리해 본다. fine-tuning 평가는 학습/검증 분리와 누수를 더 엄격히 본다.",
-        "code": "case = {'question': q, 'expected': answer}\nactual = rag(case['question'])\nscore = judge(expected=case['expected'], actual=actual)"
+        "code": "case = {'question': q, 'expected': answer} actual = rag(case['question']) score = judge(expected=case['expected'], actual=actual)"
       },
       {
         "heading": "회귀 평가셋",
@@ -878,10 +878,10 @@ window.AI_STUDY_CURRICULUM = [
     ],
     "learningGoals": [
       "Structured output과 tool agent 재점검의 핵심 개념을 shape, 코드 흐름, 비용 관점에서 설명한다.",
-      "입력 shape, 출력 shape, 자주 나는 오류를 함께 확인한다."
+      "짧은 실습과 self-check로 입력·출력 계약과 흔한 실수를 확인한다."
     ],
     "mentalModel": {
-      "metaphor": "구조화 출력과 tool 호출은 모델 출력을 제품 코드가 다루는 계약으로 바꾼다.",
+      "conceptNote": "구조화 출력과 tool 호출은 모델 출력을 제품 코드가 다루는 계약으로 바꾼다.",
       "flow": "입력 컨텍스트 → constrained/structured output → tool call → validation → fallback",
       "shape": "JSON schema는 tensor shape가 아니라 API contract다."
     },
@@ -889,7 +889,7 @@ window.AI_STUDY_CURRICULUM = [
       {
         "heading": "핵심 개념",
         "body": "structured output은 downstream 코드가 기대하는 필드를 안정적으로 받기 위한 장치다. 모델 parameter를 직접 바꾸지는 않는다.",
-        "code": "schema = {'answer': 'string', 'citations': ['url'], 'confidence': 'number'}\nvalidate(model_output, schema)"
+        "code": "schema = {'answer': 'string', 'citations': ['url'], 'confidence': 'number'} validate(model_output, schema)"
       },
       {
         "heading": "평가 연결",
@@ -946,10 +946,10 @@ window.AI_STUDY_CURRICULUM = [
     ],
     "learningGoals": [
       "CNN-to-ViT 전환과 patch embedding의 핵심 개념을 shape, 코드 흐름, 비용 관점에서 설명한다.",
-      "입력 shape, 출력 shape, 자주 나는 오류를 함께 확인한다."
+      "짧은 실습과 self-check로 입력·출력 계약과 흔한 실수를 확인한다."
     ],
     "mentalModel": {
-      "metaphor": "ViT는 이미지를 patch token sequence로 바꾸고 Transformer 흐름을 적용한다.",
+      "conceptNote": "ViT는 이미지를 patch token sequence로 바꾸고 Transformer 흐름을 적용한다.",
       "flow": "image [B,C,H,W] → patches [B,N,P²C] → tokens [B,N,D] → Transformer",
       "shape": "224x224 image, patch 16이면 N=196 tokens"
     },
@@ -957,7 +957,7 @@ window.AI_STUDY_CURRICULUM = [
       {
         "heading": "핵심 개념",
         "body": "CNN은 local filter inductive bias가 강하고, ViT는 patch sequence와 attention으로 전역 관계를 학습한다.",
-        "code": "patches = image.unfold(2, 16, 16).unfold(3, 16, 16)\ntokens = patch_linear(patches.flatten(-3))",
+        "code": "patches = image.unfold(2, 16, 16).unfold(3, 16, 16) tokens = patch_linear(patches.flatten(-3))",
         "widget": "vit-patches"
       },
       {
@@ -1014,10 +1014,10 @@ window.AI_STUDY_CURRICULUM = [
     ],
     "learningGoals": [
       "CLIP/VLM 직관과 멀티모달 연결의 핵심 개념을 shape, 코드 흐름, 비용 관점에서 설명한다.",
-      "입력 shape, 출력 shape, 자주 나는 오류를 함께 확인한다."
+      "짧은 실습과 self-check로 입력·출력 계약과 흔한 실수를 확인한다."
     ],
     "mentalModel": {
-      "metaphor": "이미지와 텍스트 표현을 같은 공간에 맞추면 검색, 분류, grounding을 연결할 수 있다.",
+      "conceptNote": "이미지와 텍스트 표현을 같은 공간에 맞추면 검색, 분류, grounding을 연결할 수 있다.",
       "flow": "image encoder → image embedding, text encoder → text embedding, contrastive alignment",
       "shape": "image vector [B,D], text vector [B,D], similarity [B,B]"
     },
@@ -1025,7 +1025,7 @@ window.AI_STUDY_CURRICULUM = [
       {
         "heading": "핵심 개념",
         "body": "CLIP류 모델은 이미지와 텍스트 쌍을 가깝게, 다른 쌍을 멀게 하도록 학습해 zero-shot 분류/검색 감각을 만든다.",
-        "code": "sim = image_emb @ text_emb.T\nloss = contrastive_loss(sim, labels=torch.arange(B))"
+        "code": "sim = image_emb @ text_emb.T loss = contrastive_loss(sim, labels=torch.arange(B))"
       },
       {
         "heading": "VLM 연결",
@@ -1082,10 +1082,10 @@ window.AI_STUDY_CURRICULUM = [
     ],
     "learningGoals": [
       "On-device 최적화: latency, memory, quantization, export의 핵심 개념을 shape, 코드 흐름, 비용 관점에서 설명한다.",
-      "입력 shape, 출력 shape, 자주 나는 오류를 함께 확인한다."
+      "짧은 실습과 self-check로 입력·출력 계약과 흔한 실수를 확인한다."
     ],
     "mentalModel": {
-      "metaphor": "온디바이스 배포는 정확도, 지연시간, 메모리, 전력의 동시 제약을 맞추는 작업이다.",
+      "conceptNote": "온디바이스 배포는 정확도, 지연시간, 메모리, 전력의 동시 제약을 맞추는 작업이다.",
       "flow": "train/eval model → export → quantize/optimize → runtime profile",
       "shape": "weights dtype, activation memory, batch/context가 비용을 결정한다."
     },
@@ -1093,7 +1093,7 @@ window.AI_STUDY_CURRICULUM = [
       {
         "heading": "핵심 개념",
         "body": "quantization은 weight/activation 표현 정밀도를 낮춰 memory와 latency를 줄이지만 calibration과 정확도 손실 검증이 필요하다.",
-        "code": "model.eval()\nwith torch.no_grad():\n    exported = torch.export.export(model, example_inputs)"
+        "code": "model.eval() with torch.no_grad(): exported = torch.export.export(model, example_inputs)"
       },
       {
         "heading": "Export와 runtime",
@@ -1151,10 +1151,10 @@ window.AI_STUDY_CURRICULUM = [
     ],
     "learningGoals": [
       "미니 프로젝트 지도: tiny transformer, RAG eval, on-device lab의 핵심 개념을 shape, 코드 흐름, 비용 관점에서 설명한다.",
-      "입력 shape, 출력 shape, 자주 나는 오류를 함께 확인한다."
+      "짧은 실습과 self-check로 입력·출력 계약과 흔한 실수를 확인한다."
     ],
     "mentalModel": {
-      "metaphor": "세 프로젝트는 구현, 평가, 배포 제약을 각각 검증 가능한 산출물로 만든다.",
+      "conceptNote": "세 프로젝트는 구현, 평가, 배포 제약을 각각 검증 가능한 산출물로 만든다.",
       "flow": "implement → evaluate → optimize",
       "shape": "각 프로젝트는 입력/출력 계약과 성공 지표를 가진다."
     },
@@ -1217,10 +1217,10 @@ window.AI_STUDY_CURRICULUM = [
     ],
     "learningGoals": [
       "수업 전 체크리스트와 source map의 핵심 개념을 shape, 코드 흐름, 비용 관점에서 설명한다.",
-      "입력 shape, 출력 shape, 자주 나는 오류를 함께 확인한다."
+      "짧은 실습과 self-check로 입력·출력 계약과 흔한 실수를 확인한다."
     ],
     "mentalModel": {
-      "metaphor": "마지막 점검은 약한 개념을 찾고 공식 출처로 되돌아가는 복습 루프다.",
+      "conceptNote": "마지막 점검은 약한 개념을 찾고 공식 출처로 되돌아가는 복습 루프다.",
       "flow": "check readiness → map weak topic → revisit source → run mini lab",
       "shape": "체크리스트는 개념, 코드, 평가, 배포 네 축으로 나눈다."
     },
@@ -1240,7 +1240,7 @@ window.AI_STUDY_CURRICULUM = [
       {
         "heading": "Source map",
         "body": "아래 출처 목록은 renderer가 전체 챕터 sources를 모아 다시 보여준다.",
-        "code": "for chapter in curriculum:\n    print(chapter.id, chapter.sources)"
+        "code": "for chapter in curriculum: print(chapter.id, chapter.sources)"
       }
     ],
     "lab": {
