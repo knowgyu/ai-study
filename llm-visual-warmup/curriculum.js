@@ -25,7 +25,7 @@ window.AI_STUDY_CURRICULUM = (() => {
     dataset: "class TextDataset(Dataset):\n    def __getitem__(self, i):\n        chunk = ids[i:i+block_size+1]\n        return chunk[:-1], chunk[1:]",
     attention: "scores = q @ k.transpose(-2, -1) / math.sqrt(d)\nscores = scores.masked_fill(causal_mask == 0, -float('inf'))\nweights = scores.softmax(dim=-1)\nout = weights @ v",
     module: "class Block(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.attn = SelfAttention()\n        self.mlp = MLP()\n    def forward(self, x):\n        x = x + self.attn(norm(x))\n        return x + self.mlp(norm(x))",
-    lora: "# W는 freeze, A/B만 학습\ny = x @ W.T + scale * (x @ A.T @ B.T)",
+    lora: "# pseudo PyTorch: W는 freeze, A/B adapter만 학습\nbase.weight.requires_grad_(False)\ny = x @ W.T + scale * (x @ A.T @ B.T)",
     eval: "case = {'question': q, 'expected': answer}\nactual = rag(case['question'])\nscore = judge(expected=case['expected'], actual=actual)",
     vit: "patches = image.unfold(2, 16, 16).unfold(3, 16, 16)\ntokens = patch_linear(patches.flatten(-3))",
     device: "model.eval()\nwith torch.no_grad():\n    exported = torch.export.export(model, example_inputs)"
